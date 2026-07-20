@@ -1,0 +1,1475 @@
+{
+  "info": {
+    "name": "Waves - Ecommerce Backend API",
+    "description": "Full API collection for the Waves e-commerce backend (Laravel 13). All request URLs are literal (no Postman variables). Base URL used throughout: http://127.0.0.1:8000/api\n\nTwo separate auth tokens are used: an Admin token (full access) and a Customer token (can only place/view their own orders). Replace the placeholder Bearer token text in each protected request with a real token obtained from the matching login request.\n\nProduct lifecycle extras: GET /admin/products/trashed (list soft-deleted), PATCH /admin/products/{id}/reassign (move to another category/brand - works even on trashed products), POST /admin/products/{id}/restore, DELETE /admin/products/{id}/force (permanent delete). Deleting a Category or Brand that still has products (even soft-deleted ones) returns 409 with a 'blocking_products' list instead of deleting.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Admin - Auth",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "http://127.0.0.1:8000/api/admin/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin@12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Admin Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/logout",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin - Current Admin (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Dashboard",
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/dashboard",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Categories",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/categories",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/categories",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name_ar",
+                  "value": "احذية رياضية",
+                  "type": "text"
+                },
+                {
+                  "key": "name_en",
+                  "value": "Sports Shoes",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Category description",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/categories/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/categories/1",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "_method",
+                  "value": "PUT",
+                  "type": "text"
+                },
+                {
+                  "key": "name_ar",
+                  "value": "احذية رياضية محدثة",
+                  "type": "text"
+                },
+                {
+                  "key": "name_en",
+                  "value": "Sports Shoes Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/categories/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Brands",
+      "item": [
+        {
+          "name": "List Brands",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/brands",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Brand",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/brands",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Nike",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Brand description",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "logo",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Brand by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/brands/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Brand",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/brands/1",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "_method",
+                  "value": "PUT",
+                  "type": "text"
+                },
+                {
+                  "key": "name",
+                  "value": "Nike Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "logo",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Brand",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/brands/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Products",
+      "item": [
+        {
+          "name": "List Products (search/filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/products?search=shoe&category_id=1&brand_id=1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/products",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name_ar",
+                  "value": "حذاء رياضي",
+                  "type": "text"
+                },
+                {
+                  "key": "name_en",
+                  "value": "Sports Shoe",
+                  "type": "text"
+                },
+                {
+                  "key": "description_ar",
+                  "value": "وصف المنتج",
+                  "type": "text"
+                },
+                {
+                  "key": "description_en",
+                  "value": "Product description",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "89.99",
+                  "type": "text"
+                },
+                {
+                  "key": "quantity",
+                  "value": "20",
+                  "type": "text"
+                },
+                {
+                  "key": "category_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "brand_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "featured",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "main_image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "additional_images[]",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/products/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/products/1",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "_method",
+                  "value": "PUT",
+                  "type": "text"
+                },
+                {
+                  "key": "name_ar",
+                  "value": "حذاء رياضي محدث",
+                  "type": "text"
+                },
+                {
+                  "key": "name_en",
+                  "value": "Sports Shoe Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "description_ar",
+                  "value": "وصف محدث",
+                  "type": "text"
+                },
+                {
+                  "key": "description_en",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "99.99",
+                  "type": "text"
+                },
+                {
+                  "key": "quantity",
+                  "value": "15",
+                  "type": "text"
+                },
+                {
+                  "key": "category_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "brand_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "featured",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "main_image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "additional_images[]",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Product (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/products/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Trashed (soft-deleted) Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/products/trashed",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reassign Product (change category/brand)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "http://127.0.0.1:8000/api/admin/products/1/reassign",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Restore Trashed Product",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/products/1/restore",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Force Delete Product (permanent)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/products/1/force",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Banners",
+      "item": [
+        {
+          "name": "List Banners",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/banners",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Banner",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/banners",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Summer Sale",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Banner description",
+                  "type": "text"
+                },
+                {
+                  "key": "link",
+                  "value": "https://example.com/sale",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Banner by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/banners/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Banner",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/banners/1",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "_method",
+                  "value": "PUT",
+                  "type": "text"
+                },
+                {
+                  "key": "title",
+                  "value": "Summer Sale Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "link",
+                  "value": "https://example.com/sale",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Banner",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/banners/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Banner Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/banners/1/toggle-status",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Gallery",
+      "item": [
+        {
+          "name": "List Gallery Images",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/gallery",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Gallery Image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/gallery",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Store Photo",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Image description",
+                  "type": "text"
+                },
+                {
+                  "key": "sort_order",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Gallery Image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/gallery/1",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "_method",
+                  "value": "PUT",
+                  "type": "text"
+                },
+                {
+                  "key": "title",
+                  "value": "Store Photo Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "sort_order",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Gallery Image",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/gallery/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Gallery Image Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/gallery/1/toggle-status",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sort Gallery Images",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "http://127.0.0.1:8000/api/admin/gallery/sort",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"id\": 1,\n      \"sort_order\": 0\n    },\n    {\n      \"id\": 2,\n      \"sort_order\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Contact Messages",
+      "item": [
+        {
+          "name": "List Contact Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/contact-messages",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Contact Message by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/contact-messages/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Message as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/contact-messages/1/mark-as-read",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Contact Message",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/contact-messages/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Orders",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/orders",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/admin/orders/1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "http://127.0.0.1:8000/api/admin/orders/1/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_ADMIN_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer - Auth & Orders",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "http://127.0.0.1:8000/api/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sara\",\n  \"email\": \"sara@test.com\",\n  \"password\": \"12345678\",\n  \"password_confirmation\": \"12345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "http://127.0.0.1:8000/api/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sara@test.com\",\n  \"password\": \"12345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/logout",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_CUSTOMER_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Current Customer (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_CUSTOMER_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "My Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/my-orders",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_CUSTOMER_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Order (Cart -> Order) - requires login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "http://127.0.0.1:8000/api/orders",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_name\": \"Mohammad\",\n  \"customer_phone\": \"0791234567\",\n  \"customer_email\": \"mohammad@test.com\",\n  \"customer_address\": \"Amman, Jordan\",\n  \"products\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": 2,\n      \"quantity\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "PASTE_CUSTOMER_TOKEN_HERE",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public API",
+      "item": [
+        {
+          "name": "Active Banners",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/banners"
+          }
+        },
+        {
+          "name": "All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/categories"
+          }
+        },
+        {
+          "name": "Category Details + Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/categories/1"
+          }
+        },
+        {
+          "name": "All Brands",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/brands"
+          }
+        },
+        {
+          "name": "Brand Details + Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/brands/1"
+          }
+        },
+        {
+          "name": "All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/products"
+          }
+        },
+        {
+          "name": "Product Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/products/1"
+          }
+        },
+        {
+          "name": "Search / Filter Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/products/search?search=shoe&category=1&brand=1&min_price=10&max_price=500"
+          }
+        },
+        {
+          "name": "Gallery Images",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8000/api/gallery"
+          }
+        },
+        {
+          "name": "Send Contact Us Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "http://127.0.0.1:8000/api/contact-us",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ahmad\",\n  \"phone\": \"0791234567\",\n  \"email\": \"ahmad@test.com\",\n  \"message\": \"I have a question about a product\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

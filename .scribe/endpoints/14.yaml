@@ -1,0 +1,111 @@
+name: 'Public - Contact Us'
+description: |-
+
+  Open endpoint, no login required.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/contact-us
+    metadata:
+      custom: []
+      groupName: 'Public - Contact Us'
+      groupDescription: |-
+
+        Open endpoint, no login required.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Send a contact message'
+      description: 'POST /api/contact-us'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      phone:
+        custom: []
+        name: phone
+        description: 'Must not be greater than 20 characters.'
+        required: false
+        example: ngzmiyvdljnikhwa
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      email:
+        custom: []
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: true
+        example: breitenberg.gilbert@example.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      message:
+        custom: []
+        name: message
+        description: 'Must not be greater than 2000 characters.'
+        required: true
+        example: u
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+      phone: ngzmiyvdljnikhwa
+      email: breitenberg.gilbert@example.com
+      message: u
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: |-
+          {
+            "success": true,
+            "message": "Your message has been sent successfully, we will contact you soon",
+            "data": {
+              "id": 1, "name": "Ahmad", "phone": "0791234567", "email": "ahmad@test.com",
+              "message": "I have a question about a product", "is_read": false, "created_at": "2026-07-20T10:00:00.000000Z"
+            }
+          }
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "message": "The name field is required.",
+            "errors": { "name": ["The name field is required."] }
+          }
+        headers: []
+        description: 'Validation error'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

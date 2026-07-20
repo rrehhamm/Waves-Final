@@ -1,0 +1,226 @@
+name: 'Customer - Orders'
+description: |-
+
+  Place and view orders. Requires a Customer Bearer token — guests cannot order.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/my-orders
+    metadata:
+      custom: []
+      groupName: 'Customer - Orders'
+      groupDescription: |-
+
+        Place and view orders. Requires a Customer Bearer token — guests cannot order.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List my orders'
+      description: |-
+        GET /api/my-orders
+        محمي بـ auth:user - العميل بيشوف طلباته هو بس (مش طلبات عملاء تانيين)
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+              "message": "The route Ecommerce%20Backend/public/api/my-orders could not be found."
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/orders
+    metadata:
+      custom: []
+      groupName: 'Customer - Orders'
+      groupDescription: |-
+
+        Place and view orders. Requires a Customer Bearer token — guests cannot order.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Create an order'
+      description: |-
+        POST /api/orders
+        محمي بـ auth:user (شوف routes/api.php) - لازم تسجيل دخول عشان تعمل طلب.
+        الزائر (Guest) يقدر يتصفح المنتجات (GET endpoints) بس مش يعمل Order.
+        Body: {
+          "customer_name": "...", "customer_phone": "...", "customer_email": "...", "customer_address": "...",
+          "products": [ {"product_id": 1, "quantity": 2}, {"product_id": 5, "quantity": 1} ]
+        }
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      customer_name:
+        custom: []
+        name: customer_name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      customer_phone:
+        custom: []
+        name: customer_phone
+        description: 'Must not be greater than 20 characters.'
+        required: true
+        example: ngzmiyvdljnikhwa
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      customer_email:
+        custom: []
+        name: customer_email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: false
+        example: breitenberg.gilbert@example.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      customer_address:
+        custom: []
+        name: customer_address
+        description: 'Must not be greater than 500 characters.'
+        required: false
+        example: u
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      products:
+        custom: []
+        name: products
+        description: 'Must have at least 1 items.'
+        required: true
+        example:
+          - []
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'products[].product_id':
+        custom: []
+        name: 'products[].product_id'
+        description: ''
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'products[].quantity':
+        custom: []
+        name: 'products[].quantity'
+        description: 'Must be at least 1.'
+        required: true
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      customer_name: b
+      customer_phone: ngzmiyvdljnikhwa
+      customer_email: breitenberg.gilbert@example.com
+      customer_address: u
+      products:
+        -
+          product_id: 16
+          quantity: 22
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: |-
+          {
+            "success": true,
+            "message": "Your order has been created successfully, order number: ORD-20260720-9K3XQ2",
+            "data": {
+              "id": 1, "user_id": 3, "order_number": "ORD-20260720-9K3XQ2",
+              "customer_name": "Mohammad", "customer_phone": "0791234567", "customer_email": "mohammad@test.com", "customer_address": "Amman, Jordan",
+              "total_price": 149.97, "status": "pending",
+              "items": [
+                { "id": 1, "product_id": 3, "product_name": "Running Shoes", "price": 49.99, "quantity": 2, "subtotal": 99.98 },
+                { "id": 2, "product_id": 7, "product_name": "Sport Jacket", "price": 49.99, "quantity": 1, "subtotal": 49.99 }
+              ],
+              "created_at": "2026-07-20T10:00:00.000000Z"
+            }
+          }
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 401
+        content: |-
+          {
+            "message": "Unauthenticated."
+          }
+        headers: []
+        description: 'Guest (no token)'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "message": "One of the selected products was not found.",
+            "errors": { "products.0.product_id": ["One of the selected products was not found."] }
+          }
+        headers: []
+        description: 'Invalid/inactive product'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

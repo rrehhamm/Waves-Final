@@ -1,0 +1,154 @@
+name: 'Public - Products'
+description: |-
+
+  Open endpoints, no login required.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/products/search
+    metadata:
+      custom: []
+      groupName: 'Public - Products'
+      groupDescription: |-
+
+        Open endpoints, no login required.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Search / filter products'
+      description: |-
+        GET /api/products/search?search=...&category=...&brand=...&min_price=...&max_price=...
+        (متطلب رقم 10: GET /products/search filters: category, brand, price)
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+              "message": "The route Ecommerce%20Backend/public/api/products/search could not be found."
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/products
+    metadata:
+      custom: []
+      groupName: 'Public - Products'
+      groupDescription: |-
+
+        Open endpoints, no login required.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List active products'
+      description: 'GET /api/products'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+              "message": "The route Ecommerce%20Backend/public/api/products could not be found."
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/products/{id}'
+    metadata:
+      custom: []
+      groupName: 'Public - Products'
+      groupDescription: |-
+
+        Open endpoints, no login required.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get a product'
+      description: 'GET /api/products/{id}'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the product.'
+        required: true
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 2
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+              "message": "The route Ecommerce%20Backend/public/api/products/2 could not be found."
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

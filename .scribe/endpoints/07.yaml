@@ -1,0 +1,239 @@
+name: 'Admin - Contact Messages'
+description: |-
+
+  View and manage messages submitted through the storefront's Contact Us form.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin/contact-messages
+    metadata:
+      custom: []
+      groupName: 'Admin - Contact Messages'
+      groupDescription: |-
+
+        View and manage messages submitted through the storefront's Contact Us form.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List contact messages'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+              "message": "The route Ecommerce%20Backend/public/api/admin/contact-messages could not be found."
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/admin/contact-messages/{contactMessage_id}'
+    metadata:
+      custom: []
+      groupName: 'Admin - Contact Messages'
+      groupDescription: |-
+
+        View and manage messages submitted through the storefront's Contact Us form.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get a contact message'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters:
+      contactMessage_id:
+        custom: []
+        name: contactMessage_id
+        description: 'The ID of the contactMessage.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      contactMessage_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+              "message": "The route Ecommerce%20Backend/public/api/admin/contact-messages/1 could not be found."
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PATCH
+    uri: 'api/admin/contact-messages/{contactMessage_id}/mark-as-read'
+    metadata:
+      custom: []
+      groupName: 'Admin - Contact Messages'
+      groupDescription: |-
+
+        View and manage messages submitted through the storefront's Contact Us form.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Mark a message as read'
+      description: 'PATCH /api/admin/contact-messages/{contactMessage}/mark-as-read'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters:
+      contactMessage_id:
+        custom: []
+        name: contactMessage_id
+        description: 'The ID of the contactMessage.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      contactMessage_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Message marked as read",
+            "data": {
+              "id": 1, "name": "Ahmad", "phone": "0791234567", "email": "ahmad@test.com",
+              "message": "I have a question about a product", "is_read": true, "created_at": "2026-07-20T10:00:00.000000Z"
+            }
+          }
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/admin/contact-messages/{contactMessage_id}'
+    metadata:
+      custom: []
+      groupName: 'Admin - Contact Messages'
+      groupDescription: |-
+
+        View and manage messages submitted through the storefront's Contact Us form.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete a contact message'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters:
+      contactMessage_id:
+        custom: []
+        name: contactMessage_id
+        description: 'The ID of the contactMessage.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      contactMessage_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Message deleted successfully"
+          }
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

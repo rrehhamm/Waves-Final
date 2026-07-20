@@ -1,0 +1,209 @@
+name: 'Admin - Orders'
+description: |-
+
+  View all customer orders and update their status.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin/orders
+    metadata:
+      custom: []
+      groupName: 'Admin - Orders'
+      groupDescription: |-
+
+        View all customer orders and update their status.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List all orders'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+              "message": "The route Ecommerce%20Backend/public/api/admin/orders could not be found."
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/admin/orders/{order_id}'
+    metadata:
+      custom: []
+      groupName: 'Admin - Orders'
+      groupDescription: |-
+
+        View all customer orders and update their status.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get an order'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters:
+      order_id:
+        custom: []
+        name: order_id
+        description: 'The ID of the order.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      order_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+              "message": "The route Ecommerce%20Backend/public/api/admin/orders/1 could not be found."
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PATCH
+    uri: 'api/admin/orders/{order_id}/status'
+    metadata:
+      custom: []
+      groupName: 'Admin - Orders'
+      groupDescription: |-
+
+        View all customer orders and update their status.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update order status'
+      description: |-
+        PATCH /api/admin/orders/{order}/status
+        Body: { "status": "confirmed" }
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters:
+      order_id:
+        custom: []
+        name: order_id
+        description: 'The ID of the order.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      order_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      status:
+        custom: []
+        name: status
+        description: 'Rule::in(): القيمة لازم تكون وحدة من هاد الخمسة بالظبط، وإلا بيرفضها الفحص.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      status: architecto
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Order status updated successfully",
+            "data": {
+              "id": 1, "user_id": 3, "order_number": "ORD-20260720-9K3XQ2",
+              "customer_name": "Mohammad", "customer_phone": "0791234567", "customer_email": "mohammad@test.com", "customer_address": "Amman, Jordan",
+              "total_price": 149.97, "status": "confirmed",
+              "items": [
+                { "id": 1, "product_id": 3, "product_name": "Running Shoes", "price": 49.99, "quantity": 2, "subtotal": 99.98 },
+                { "id": 2, "product_id": 7, "product_name": "Sport Jacket", "price": 49.99, "quantity": 1, "subtotal": 49.99 }
+              ],
+              "created_at": "2026-07-20T10:00:00.000000Z"
+            }
+          }
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "message": "The selected status is invalid.",
+            "errors": { "status": ["The selected status is invalid."] }
+          }
+        headers: []
+        description: 'Invalid status value'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

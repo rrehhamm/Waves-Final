@@ -1,0 +1,50 @@
+name: 'Public - Gallery'
+description: |-
+
+  Open endpoint, no login required.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/gallery
+    metadata:
+      custom: []
+      groupName: 'Public - Gallery'
+      groupDescription: |-
+
+        Open endpoint, no login required.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List active gallery images'
+      description: 'GET /api/gallery'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Accept-Language: en
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+              "message": "The route Ecommerce%20Backend/public/api/gallery could not be found."
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
