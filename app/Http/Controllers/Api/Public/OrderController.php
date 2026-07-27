@@ -53,7 +53,8 @@ class OrderController extends Controller
      *   "data": {
      *     "id": 1, "user_id": 3, "order_number": "ORD-20260720-9K3XQ2",
      *     "customer_name": "Mohammad", "customer_phone": "0791234567", "customer_email": "mohammad@test.com", "customer_address": "Amman, Jordan",
-     *     "total_price": 149.97, "status": "pending",
+     *     "subtotal_price": 149.97, "discount_amount": 29.99, "first_order_discount_applied": true,
+     *     "total_price": 119.98, "status": "pending",
      *     "items": [
      *       { "id": 1, "product_id": 3, "product_name": "Running Shoes", "price": 49.99, "quantity": 2, "subtotal": 99.98 },
      *       { "id": 2, "product_id": 7, "product_name": "Sport Jacket", "price": 49.99, "quantity": 1, "subtotal": 49.99 }
@@ -69,53 +70,70 @@ class OrderController extends Controller
      *   "errors": { "products.0.product_id": ["One of the selected products was not found."] }
      * }
      */
+    // خصم أول طلب (متطلب "Discount Management" - الاستثناء الوحيد المسموح يكون تلقائي/غير مرتبط بمنتج معين)
+    private const FIRST_ORDER_DISCOUNT_PERCENT = 20;
+
     public function store(StoreOrderRequest $request)
     {
         $validated = $request->validated();
 
         // بما إن المسار محمي بـ auth:user، $request->user() مضمون إنه موجود (مش null)
-        $userId = $request->user()->id;
+        $user = $request->user();
+
+        // مهم: لازم نتحقق قبل ما ننشئ الطلب - أول ما ننشئه، doesntExist() رح ترجع false
+        // (هيك خصم أول طلب بيصير غير متاح تلقائياً لأي طلب بعده، بدون ما نحتاج عمود/flag إضافي على المستخدم)
+        $isFirstOrder = $user->isEligibleForFirstOrderDiscount();
 
         // DB::transaction: بيشغّل كل الاستعلامات جوا { } كوحدة واحدة (Atomic)
         // لو صار أي خطأ بالنص (مثلاً منتج مش موجود)، كل التغييرات بترجع لورا تلقائياً (rollback)
         // وما بيتسجل طلب ناقص أو خاطئ بالداتابيز
-        $order = DB::transaction(function () use ($validated, $userId) {
-            $totalPrice = 0;
+        $order = DB::transaction(function () use ($validated, $user, $isFirstOrder) {
+            $subtotalPrice = 0;
             $itemsData = [];
 
-            // 1) نمر على كل منتج بالسلة، نحسب سعره، ونجهز بيانات order_items
+            // 1) نمر على كل منتج بالسلة، نحسب سعره (final_price = بعد خصم الأدمن على المنتج نفسه لو موجود)، ونجهز بيانات order_items
             foreach ($validated['products'] as $item) {
                 $product = Product::findOrFail($item['product_id']);
 
-                $subtotal = $product->price * $item['quantity'];
-                $totalPrice += $subtotal;
+                $unitPrice = $product->final_price; // بيراعي discount_percent تبع المنتج تلقائياً
+                $subtotal = $unitPrice * $item['quantity'];
+                $subtotalPrice += $subtotal;
 
                 $itemsData[] = [
                     'product_id' => $product->id,
                     // بنخزن نسخة من الاسم والسعر وقت الطلب (شرحنا السبب بـ migration order_items)
                     'product_name' => trans_field($product, 'name'),
-                    'price' => $product->price,
+                    'price' => $unitPrice,
                     'quantity' => $item['quantity'],
                     'subtotal' => $subtotal,
                 ];
             }
 
-            // 2) نولّد رقم طلب فريد، مثلاً: ORD-20260718-9K3XQ2
+            // 2) خصم أول طلب (20%) - بيتطبق على المجموع الفرعي، بس لو هاد فعلاً أول طلب للعميل
+            $discountAmount = $isFirstOrder
+                ? round($subtotalPrice * (self::FIRST_ORDER_DISCOUNT_PERCENT / 100), 2)
+                : 0;
+            $totalPrice = $subtotalPrice - $discountAmount;
+
+            // 3) نولّد رقم طلب فريد، مثلاً: ORD-20260718-9K3XQ2
             $orderNumber = 'ORD-'.now()->format('Ymd').'-'.Str::upper(Str::random(6));
 
-            // 3) ننشئ الطلب نفسه
+            // 4) ننشئ الطلب نفسه
             $order = Order::create([
-                'user_id' => $userId, // null لو Guest، أو id العميل لو مسجل دخول
+                'user_id' => $user->id,
                 'order_number' => $orderNumber,
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
                 'customer_email' => $validated['customer_email'] ?? null,
                 'customer_address' => $validated['customer_address'] ?? null,
+                'subtotal_price' => $subtotalPrice,
+                'discount_amount' => $discountAmount,
+                'first_order_discount_applied' => $isFirstOrder,
                 'total_price' => $totalPrice,
                 'status' => 'pending', // كل طلب جديد بيبدأ "قيد الانتظار"
             ]);
 
-            // 4) ننشئ كل عناصر الطلب مرة وحدة (createMany أسرع من create() بلوب)
+            // 5) ننشئ كل عناصر الطلب مرة وحدة (createMany أسرع من create() بلوب)
             $order->items()->createMany($itemsData);
 
             return $order;

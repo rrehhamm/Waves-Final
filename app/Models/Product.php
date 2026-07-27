@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'name_ar', 'name_en', 'description_ar', 'description_en',
-    'price', 'quantity', 'main_image', 'additional_images',
+    'price', 'discount_percent', 'quantity', 'main_image', 'additional_images',
     'category_id', 'brand_id', 'status', 'featured',
 ])]
 class Product extends Model
@@ -29,10 +29,23 @@ class Product extends Model
     {
         return [
             'price' => 'decimal:2',           // بيضمن دايماً رقمين بعد الفاصلة
+            'discount_percent' => 'integer',
             'additional_images' => 'array',    // JSON بالداتابيز <-> array بالـ PHP تلقائياً
             'status' => 'boolean',
             'featured' => 'boolean',
         ];
+    }
+
+    /**
+     * السعر النهائي بعد خصم الأدمن (discount_percent) - لو مفيش خصم، بيرجع نفس السعر الأصلي
+     */
+    public function getFinalPriceAttribute(): float
+    {
+        if (! $this->discount_percent) {
+            return (float) $this->price;
+        }
+
+        return round((float) $this->price * (1 - $this->discount_percent / 100), 2);
     }
 
     /**

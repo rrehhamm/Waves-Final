@@ -24,5 +24,9 @@ class DatabaseSeeder extends Seeder
 
         // بينفّذ AdminSeeder (بيعمل أول حساب أدمن) كل ما شغّلنا: php artisan db:seed
         $this->call(AdminSeeder::class);
+
+        // بيعبي التصنيفات/البراندات/البانر يلي كانوا ثابتين بالفرونت إند كصفوف حقيقية بالداتابيز
+        // (هيك بيظهروا بالأدمن داشبورد وتقدر تعدّلهم/تحذفهم بدل ما يضلوا مجرد بيانات ثابتة بالكود)
+        $this->call(HomepageContentSeeder::class);
     }
 }

@@ -38,6 +38,34 @@ if (! function_exists('trans_field')) {
     }
 }
 
+if (! function_exists('upload_error_message')) {
+    /**
+     * لما PHP نفسه (قبل حتى ما توصل الصورة لفحص Laravel) يرفض ملف مرفوع لأنه أكبر من
+     * upload_max_filesize أو post_max_size بملف php.ini، بيوصل الملف لـ Laravel "تالف"
+     * (isValid() = false) وبيفشل بفحص "image" برسالة عامة مو واضحة ("must be an image")
+     * حتى لو الملف فعلياً صورة سليمة. هاد الدالة بتكتشف هاد الحالة بالتحديد وبترجع
+     * رسالة أوضح تشرح المشكلة الحقيقية (حجم الملف / إعدادات السيرفر).
+     */
+    function upload_error_message(?\Illuminate\Http\UploadedFile $file): ?string
+    {
+        if (! $file) {
+            return null;
+        }
+
+        $error = $file->getError();
+
+        if ($error === UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        return match ($error) {
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => trans('messages.upload_too_large'),
+            UPLOAD_ERR_PARTIAL => trans('messages.upload_partial'),
+            default => trans('messages.upload_failed'),
+        };
+    }
+}
+
 if (! function_exists('image_url')) {
     /**
      * يحوّل المسار المخزّن بالداتابيز (مثلاً "categories/abc123.jpg") لرابط كامل

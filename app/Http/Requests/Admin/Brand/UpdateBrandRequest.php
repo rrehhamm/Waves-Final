@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Admin\Brand;
 
+use App\Http\Requests\Concerns\ReportsUploadErrors;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBrandRequest extends FormRequest
 {
+    use ReportsUploadErrors;
+
     public function authorize(): bool
     {
         return true;
@@ -15,9 +18,10 @@ class UpdateBrandRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'logo' => ['nullable', 'image', 'max:2048'],
+            'logo' => ['nullable', 'image', 'max:25600'],
             'description' => ['nullable', 'string'],
             'status' => ['nullable', 'boolean'],
+            'featured' => ['nullable', 'boolean'],
         ];
     }
 }

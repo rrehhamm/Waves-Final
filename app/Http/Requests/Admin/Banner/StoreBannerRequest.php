@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Admin\Banner;
 
+use App\Http\Requests\Concerns\ReportsUploadErrors;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreBannerRequest extends FormRequest
 {
+    use ReportsUploadErrors;
+
     public function authorize(): bool
     {
         return true;
@@ -15,8 +18,9 @@ class StoreBannerRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
+            'tag' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'image' => ['required', 'image', 'max:2048'],
+            'image' => ['required', 'image', 'max:25600'],
             'link' => ['nullable', 'url', 'max:255'], // url: لازم يكون رابط صحيح الصيغة (https://...)
             'status' => ['nullable', 'boolean'],
         ];

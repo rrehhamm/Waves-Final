@@ -62,6 +62,8 @@ class CategoryController extends Controller
         // لو الأدمن ما بعتش status أصلاً، منحطها true افتراضياً بشكل صريح
         // (بدل ما نعتمد على الـ default بالداتابيز، عشان الـ response يرجع القيمة الصح فوراً)
         $data['status'] = $request->boolean('status', true);
+        // featured: افتراضياً false - الأدمن لازم يفعّلها يدوياً عشان التصنيف يظهر بالصفحة الرئيسية
+        $data['featured'] = $request->boolean('featured', false);
 
         if ($request->hasFile('image')) {
             $data['image'] = $this->imageService->store($request->file('image'), 'categories');

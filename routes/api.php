@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ContactMessageController;
 use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\GalleryController;
+use App\Http\Controllers\Api\Admin\HeroSectionController as AdminHeroSectionController;
 use App\Http\Controllers\Api\Admin\OrderController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Public\AuthController as PublicAuthController;
@@ -15,8 +16,10 @@ use App\Http\Controllers\Api\Public\BrandController as PublicBrandController;
 use App\Http\Controllers\Api\Public\CategoryController as PublicCategoryController;
 use App\Http\Controllers\Api\Public\ContactController as PublicContactController;
 use App\Http\Controllers\Api\Public\GalleryController as PublicGalleryController;
+use App\Http\Controllers\Api\Public\HeroSectionController as PublicHeroSectionController;
 use App\Http\Controllers\Api\Public\OrderController as PublicOrderController;
 use App\Http\Controllers\Api\Public\ProductController as PublicProductController;
+use App\Http\Controllers\Api\Public\StatsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -60,6 +63,10 @@ Route::prefix('admin')->group(function () {
         Route::apiResource('banners', BannerController::class);
         Route::patch('banners/{banner}/toggle-status', [BannerController::class, 'toggleStatus']);
 
+        // Hero Section: singleton (صف واحد بس) - مش apiResource، بس show()/update() عاديين
+        Route::get('hero', [AdminHeroSectionController::class, 'show']);
+        Route::post('hero', [AdminHeroSectionController::class, 'update']);
+
         // Gallery: مسارات يدوية (مش apiResource) عشان عندنا زيادة sort() و toggleStatus()
         Route::get('gallery', [GalleryController::class, 'index']);
         Route::post('gallery', [GalleryController::class, 'store']);
@@ -86,6 +93,9 @@ Route::prefix('admin')->group(function () {
 
 Route::get('banners', [PublicBannerController::class, 'index']);
 
+// Hero Section (القسم الكبير أعلى الصفحة الرئيسية) - منفصل عن /banners (سلايدر البروموشن الصغير)
+Route::get('hero', [PublicHeroSectionController::class, 'show']);
+
 Route::get('categories', [PublicCategoryController::class, 'index']);
 Route::get('categories/{id}', [PublicCategoryController::class, 'show']);
 
@@ -102,6 +112,9 @@ Route::get('gallery', [PublicGalleryController::class, 'index']);
 
 Route::post('contact-us', [PublicContactController::class, 'store']);
 
+// إحصائيات عامة (منتجات/براندات/زبائن) - تستخدمها الصفحة الرئيسية بدل الأرقام الثابتة القديمة
+Route::get('stats', [StatsController::class, 'index']);
+
 // ===================== Customer Auth (User) =====================
 // حساب العميل (User) منفصل عن حساب الأدمن (guard "user" مش "admin")
 // صلاحياته محدودة: تسجيل / دخول / خروج / عمل طلب / رؤية طلباته بس - ولا أي عملية إدارية
@@ -113,6 +126,7 @@ Route::post('login', [PublicAuthController::class, 'login']);
 Route::middleware('auth:user')->group(function () {
     Route::post('logout', [PublicAuthController::class, 'logout']);
     Route::get('me', [PublicAuthController::class, 'me']);
+    Route::post('profile', [PublicAuthController::class, 'updateProfile']);
     Route::get('my-orders', [PublicOrderController::class, 'myOrders']);
     Route::post('orders', [PublicOrderController::class, 'store']);
 });

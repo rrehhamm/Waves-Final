@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'logo', 'description', 'status'])]
+#[Fillable(['name', 'logo', 'description', 'status', 'featured'])]
 class Brand extends Model
 {
     use HasFactory;
@@ -16,6 +16,8 @@ class Brand extends Model
     {
         return [
             'status' => 'boolean',
+            // featured: الأدمن بيحددها يدوياً - هاي البراندات يلي بتظهر بقسم "Featured Brands" بالصفحة الرئيسية
+            'featured' => 'boolean',
         ];
     }
 

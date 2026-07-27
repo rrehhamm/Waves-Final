@@ -14,7 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 // User هون = "العميل" (Customer) - مش الأدمن. هاد الموديل منفصل تماماً عن Admin
 // وصلاحياته محدودة: بس يسجل دخول ويعمل/يشوف طلباته، مش أي عملية إدارية
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'profile_picture', 'phone', 'address_line', 'city'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -30,6 +30,15 @@ class User extends Authenticatable
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * خصم "أول طلب" (20%) بيصير متاح بس لو العميل ما عمل ولا طلب لسا
+     * بمجرد ما يعمل أول طلب، doesntExist() بترجع false تلقائياً - مفيش حاجة لعمود/flag إضافي
+     */
+    public function isEligibleForFirstOrderDiscount(): bool
+    {
+        return $this->orders()->doesntExist();
     }
 
     /**

@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'user_id', 'order_number', 'customer_name', 'customer_phone', 'customer_email',
-    'customer_address', 'total_price', 'status',
+    'customer_address', 'total_price', 'subtotal_price', 'discount_amount',
+    'first_order_discount_applied', 'status',
 ])]
 class Order extends Model
 {
@@ -17,6 +18,9 @@ class Order extends Model
     {
         return [
             'total_price' => 'decimal:2',
+            'subtotal_price' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'first_order_discount_applied' => 'boolean',
         ];
     }
 

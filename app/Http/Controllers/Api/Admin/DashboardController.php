@@ -7,7 +7,9 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\ContactMessage;
 use App\Models\GalleryImage;
+use App\Models\Order;
 use App\Models\Product;
+use App\Models\User;
 
 /**
  * @group Admin - Dashboard
@@ -32,6 +34,9 @@ class DashboardController extends Controller
                 'gallery_count' => GalleryImage::count(),
                 'contact_messages_count' => ContactMessage::count(),
                 'unread_messages_count' => ContactMessage::where('is_read', false)->count(),
+                // customers_count: عدد الزبائن المسجلين فعلياً (مش رقم ثابت) - متطلب "Customer Count Logic"
+                'customers_count' => User::count(),
+                'orders_count' => Order::count(),
             ],
         ]);
     }

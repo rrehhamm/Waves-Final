@@ -14,6 +14,8 @@ class BrandResource extends JsonResource
             'logo' => image_url($this->logo),
             'description' => $this->description,
             'status' => (bool) $this->status,
+            // featured: البراندات يلي الأدمن اختارها تظهر بقسم "Featured Brands" بالصفحة الرئيسية
+            'featured' => (bool) $this->featured,
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

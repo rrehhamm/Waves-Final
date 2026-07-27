@@ -8,6 +8,7 @@ return [
     'login_success' => 'تم تسجيل الدخول بنجاح',
     'logout_success' => 'تم تسجيل الخروج بنجاح',
     'register_success' => 'تم إنشاء الحساب بنجاح',
+    'profile_updated' => 'تم تحديث الملف الشخصي بنجاح',
 
     // ===== Categories =====
     'category_created' => 'تم إنشاء التصنيف بنجاح',
@@ -27,6 +28,9 @@ return [
     'product_deleted' => 'تم حذف المنتج بنجاح',
     'product_restored' => 'تم استعادة المنتج بنجاح',
     'product_force_deleted' => 'تم حذف المنتج نهائياً بنجاح',
+
+    // ===== Hero Section =====
+    'hero_updated' => 'تم تحديث قسم الهيرو بنجاح',
 
     // ===== Banners =====
     'banner_created' => 'تم إنشاء البانر بنجاح',
@@ -50,5 +54,11 @@ return [
     'order_status_updated' => 'تم تحديث حالة الطلب بنجاح',
     'order_products_required' => 'يجب إضافة منتج واحد على الأقل للطلب.',
     'order_product_not_found' => 'أحد المنتجات المختارة غير موجود.',
+
+    // ===== Uploads =====
+    'upload_too_large' => 'هاد الملف حجمه أكبر مما يسمح به السيرفر حالياً. جرّب صورة أصغر، أو اطلب من مسؤول الموقع يزيد قيمة upload_max_filesize و post_max_size بملف php.ini ويعيد تشغيل السيرفر.',
+    'upload_partial' => 'الملف انرفع بشكل جزئي بس. حاول مرة ثانية.',
+    'upload_failed' => 'ما قدرنا نرفع هاد الملف. جرّب صورة ثانية.',
+    'request_too_large' => 'الحجم الكلي للملفات المرفوعة أكبر مما يسمح به السيرفر حالياً. ارفع صور أقل أو أصغر، أو اطلب من مسؤول الموقع يزيد قيمة post_max_size بملف php.ini ويعيد تشغيل السيرفر.',
 
 ];

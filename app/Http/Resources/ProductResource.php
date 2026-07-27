@@ -15,6 +15,10 @@ class ProductResource extends JsonResource
             'description' => trans_field($this, 'description'),
 
             'price' => (float) $this->price,
+            // discount_percent: نسبة الخصم يلي حطها الأدمن على هاد المنتج تحديداً (منفصل عن خصم أول طلب)
+            'discount_percent' => $this->discount_percent,
+            // final_price: السعر الفعلي بعد الخصم - هاد يلي لازم يتعرض للعميل ويتحسب فيه
+            'final_price' => $this->final_price,
             'quantity' => $this->quantity,
 
             'main_image' => image_url($this->main_image),

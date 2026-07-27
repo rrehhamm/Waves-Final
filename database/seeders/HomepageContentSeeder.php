@@ -1,0 +1,154 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Banner;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\HeroSection;
+use Illuminate\Database\Seeder;
+
+// بيعبي الداتابيز بالتصنيفات/البراندات/قسم الهيرو/سلايدر البانرات يلي كانوا ثابتين (hardcoded)
+// بالفرونت إند (MAIN_CATEGORIES بـ CategoryCard.jsx، MAIN_BRANDS بـ BrandCard.jsx، نص وخلفية
+// الهيرو بـ Home.jsx) عشان تصير موجودة فعلياً بالداتابيز والأدمن يقدر يعدّلها/يحذفها من الداشبورد
+// (قبل هيك كانت بس أرقام/نصوص ثابتة بالكود، مش صفوف حقيقية - لهيك ما كانت تظهر بالداشبورد)
+//
+// ملاحظة مهمة: "الهيرو" (القسم الكبير بالخلفية والعنوان الكبير) و"البانرات" (سلايدر البروموشن
+// الصغير جنبه) شيئين منفصلين تماماً بالباك إند - hero_sections جدول Singleton لحاله،
+// و banners جدول عادي فيه أكتر من صف (سلايدات).
+//
+// الصور تم نسخها يدوياً لـ storage/app/uploads/{categories,brands,banners,hero}/
+// من wavesFrontend/src/assets، فمسارها هون بيطابق فعلياً وين موجودة عالقرص.
+class HomepageContentSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $categories = [
+            [
+                'name_en' => 'Sports Shoes',
+                'name_ar' => 'أحذية رياضية',
+                'description' => 'Performance sneakers for running, training, and everyday sport.',
+                'image' => 'categories/sports-shoes.jpg',
+            ],
+            [
+                'name_en' => "Men's Shoes",
+                'name_ar' => 'أحذية رجالية',
+                'description' => 'Classic and modern footwear styles for men.',
+                'image' => 'categories/mens-shoes.jpg',
+            ],
+            [
+                'name_en' => 'High Heels',
+                'name_ar' => 'كعب عالي',
+                'description' => 'Elegant high heels for every occasion.',
+                'image' => 'categories/high-heels.jpg',
+            ],
+            [
+                'name_en' => 'Kids Shoes',
+                'name_ar' => 'أحذية أطفال',
+                'description' => 'Comfortable and durable shoes for kids.',
+                'image' => 'categories/kids-shoes.jpg',
+            ],
+        ];
+
+        foreach ($categories as $data) {
+            // updateOrCreate بالاسم الإنجليزي: لو شغّلنا السيدر أكتر من مرة ما بيتكرر نفس التصنيف
+            Category::updateOrCreate(
+                ['name_en' => $data['name_en']],
+                [
+                    'name_ar' => $data['name_ar'],
+                    'description' => $data['description'],
+                    'image' => $data['image'],
+                    'status' => true,
+                    // featured => true: عشان تظهر مباشرة بقسم "Main Categories" بالصفحة الرئيسية
+                    'featured' => true,
+                ]
+            );
+        }
+
+        $brands = [
+            [
+                'name' => 'Nike',
+                'description' => 'Premium athletic footwear & sportswear.',
+                'logo' => 'brands/nike-shoe.jpg',
+            ],
+            [
+                'name' => 'Adidas',
+                'description' => 'Iconic streetwear & performance gear.',
+                'logo' => 'brands/adidas-shoe.jpg',
+            ],
+            [
+                'name' => 'Puma',
+                'description' => 'Sleek sportstyle sneakers & apparel.',
+                'logo' => 'brands/puma-shoe.jpg',
+            ],
+            [
+                'name' => 'Prada',
+                'description' => 'High-fashion footwear design.',
+                'logo' => 'brands/prada-shoe.jpg',
+            ],
+        ];
+
+        foreach ($brands as $data) {
+            Brand::updateOrCreate(
+                ['name' => $data['name']],
+                [
+                    'description' => $data['description'],
+                    'logo' => $data['logo'],
+                    'status' => true,
+                    // featured => true: عشان تظهر مباشرة بقسم "Featured Brands" بالصفحة الرئيسية
+                    'featured' => true,
+                ]
+            );
+        }
+
+        // تنظيف: أي نسخة قديمة من بانر "New Collection 2026" كانت تمثّل غلط قسم الهيرو
+        // (قبل ما نفصل hero_sections عن banners) - محتواها الحقيقي هلق تحت بقسم الهيرو تحت.
+        Banner::where('title', 'New Collection 2026')
+            ->where('image', 'banners/banner-bg.jpg')
+            ->delete();
+
+        // قسم الهيرو الكبير أعلى الصفحة الرئيسية - Singleton (id=1 دايماً)
+        HeroSection::updateOrCreate(
+            ['id' => 1],
+            [
+                'badge_text' => 'New Collection 2026',
+                'heading' => 'Find What Matches Your Style',
+                'subtext' => 'Browse through our diverse range of meticulously crafted footwear, designed to elevate your everyday outfit with signature elegance.',
+                'button1_text' => 'Shop Collection',
+                'button1_link' => '/products',
+                'button2_text' => 'Explore Categories',
+                'button2_link' => '/categories',
+                'background_image' => 'hero/banner-bg.jpg',
+            ]
+        );
+
+        // سلايدر البروموشن الصغير جنب الهيرو (مثال جاهز يقدر الأدمن يعدّله/يحذفه)
+        $banners = [
+            [
+                'title' => 'New Season Styles',
+                'tag' => 'Trending Now',
+                'description' => 'UP TO 40% OFF',
+                'image' => 'banners/promo-1.jpg',
+            ],
+            [
+                'title' => 'Everyday Essentials',
+                'tag' => 'Best Sellers',
+                'description' => 'FLAT 20% OFF',
+                'image' => 'banners/promo-2.jpg',
+            ],
+        ];
+
+        foreach ($banners as $data) {
+            Banner::updateOrCreate(
+                ['title' => $data['title']],
+                [
+                    'tag' => $data['tag'],
+                    'description' => $data['description'],
+                    'image' => $data['image'],
+                    'link' => null,
+                    'status' => true,
+                ]
+            );
+        }
+    }
+}

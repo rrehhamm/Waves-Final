@@ -23,6 +23,8 @@ class CategoryResource extends JsonResource
             'image' => image_url($this->image),
 
             'status' => (bool) $this->status,
+            // featured: التصنيفات يلي الأدمن اختارها تظهر بقسم "Main Categories" بالصفحة الرئيسية
+            'featured' => (bool) $this->featured,
 
             // whenLoaded: بيضيف "products" بس إذا كنا فعلاً عملنا Eager Loading لها
             // (Category::with('products')->get()) - عشان نتفادى استعلامات زيادة (N+1 problem)

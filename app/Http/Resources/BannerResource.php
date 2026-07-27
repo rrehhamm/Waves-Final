@@ -11,6 +11,8 @@ class BannerResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            // tag: badge صغير فوق العنوان بالسلايدر (مثلاً "Trending Now") - اختياري
+            'tag' => $this->tag,
             'description' => $this->description,
             'image' => image_url($this->image),
             'link' => $this->link,

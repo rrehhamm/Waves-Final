@@ -51,6 +51,7 @@ class BrandController extends Controller
     {
         $data = $request->validated();
         $data['status'] = $request->boolean('status', true);
+        $data['featured'] = $request->boolean('featured', false);
 
         if ($request->hasFile('logo')) {
             $data['logo'] = $this->imageService->store($request->file('logo'), 'brands');

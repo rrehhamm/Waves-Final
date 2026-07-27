@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api\Public;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Public\LoginUserRequest;
 use App\Http\Requests\Public\RegisterUserRequest;
+use App\Http\Requests\Public\UpdateProfileRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -20,6 +23,8 @@ use Illuminate\Validation\ValidationException;
  */
 class AuthController extends Controller
 {
+    public function __construct(protected ImageUploadService $imageService) {}
+
     /**
      * Register
      *
@@ -29,7 +34,7 @@ class AuthController extends Controller
      *   "success": true,
      *   "message": "Account created successfully",
      *   "data": {
-     *     "user": { "id": 1, "name": "Sara", "email": "sara@test.com", "email_verified_at": null, "created_at": "2026-07-20T10:00:00.000000Z", "updated_at": "2026-07-20T10:00:00.000000Z" },
+     *     "user": { "id": 1, "name": "Sara", "email": "sara@test.com", "phone": null, "profile_picture": null, "address_line": null, "city": null, "created_at": "2026-07-20T10:00:00.000000Z" },
      *     "token": "2|kfo1aLRhP4uFG48Hm8PZvA8zmQUegJz4bLVN8sqQ"
      *   }
      * }
@@ -54,7 +59,7 @@ class AuthController extends Controller
             'success' => true,
             'message' => __('messages.register_success'),
             'data' => [
-                'user' => $user,
+                'user' => new UserResource($user),
                 'token' => $token,
             ],
         ], 201);
@@ -69,7 +74,7 @@ class AuthController extends Controller
      *   "success": true,
      *   "message": "Logged in successfully",
      *   "data": {
-     *     "user": { "id": 1, "name": "Sara", "email": "sara@test.com", "email_verified_at": null, "created_at": "2026-07-20T10:00:00.000000Z", "updated_at": "2026-07-20T10:00:00.000000Z" },
+     *     "user": { "id": 1, "name": "Sara", "email": "sara@test.com", "phone": null, "profile_picture": null, "address_line": null, "city": null, "created_at": "2026-07-20T10:00:00.000000Z" },
      *     "token": "2|kfo1aLRhP4uFG48Hm8PZvA8zmQUegJz4bLVN8sqQ"
      *   }
      * }
@@ -96,7 +101,7 @@ class AuthController extends Controller
             'success' => true,
             'message' => __('messages.login_success'),
             'data' => [
-                'user' => $user,
+                'user' => new UserResource($user),
                 'token' => $token,
             ],
         ]);
@@ -130,12 +135,66 @@ class AuthController extends Controller
      * GET /api/me
      *
      * @authenticated
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "id": 1, "name": "Sara", "email": "sara@test.com", "phone": null,
+     *     "profile_picture": null, "address_line": null, "city": null,
+     *     "created_at": "2026-07-20T10:00:00.000000Z"
+     *   },
+     *   "first_order_discount_eligible": true
+     * }
      */
     public function me(Request $request)
     {
+        $user = $request->user();
+
         return response()->json([
             'success' => true,
-            'data' => $request->user(),
+            'data' => new UserResource($user),
+            // بيخلي الفرونت يعرف إذا لسا بده يعرض بانر "خصم أول طلب 20%" أو لأ (بدون ما يخمن بنفسه)
+            'first_order_discount_eligible' => $user->isEligibleForFirstOrderDiscount(),
+        ]);
+    }
+
+    /**
+     * Update my profile
+     *
+     * POST /api/profile (with `_method=PUT` for multipart/form-data, same pattern as other image uploads)
+     * لازم Header: Authorization: Bearer {customer_token}
+     * Body (multipart/form-data): name?, email?, phone?, address_line?, city?, profile_picture? (file)
+     *
+     * @authenticated
+     * @response 200 {
+     *   "success": true,
+     *   "message": "Profile updated successfully",
+     *   "data": {
+     *     "id": 1, "name": "Sara", "email": "sara@test.com", "phone": "0791234567",
+     *     "profile_picture": "http://127.0.0.1:8000/uploads/users/abc123.jpg",
+     *     "address_line": "123 Rainbow St", "city": "Amman",
+     *     "created_at": "2026-07-20T10:00:00.000000Z"
+     *   }
+     * }
+     */
+    public function updateProfile(UpdateProfileRequest $request)
+    {
+        $user = $request->user();
+        $data = $request->validated();
+
+        if ($request->hasFile('profile_picture')) {
+            $data['profile_picture'] = $this->imageService->replace(
+                $request->file('profile_picture'),
+                $user->profile_picture,
+                'users'
+            );
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.profile_updated'),
+            'data' => new UserResource($user),
         ]);
     }
 }

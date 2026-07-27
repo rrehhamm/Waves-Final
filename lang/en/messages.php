@@ -9,6 +9,7 @@ return [
     'login_success' => 'Logged in successfully',
     'logout_success' => 'Logged out successfully',
     'register_success' => 'Account created successfully',
+    'profile_updated' => 'Profile updated successfully',
 
     // ===== Categories =====
     'category_created' => 'Category created successfully',
@@ -28,6 +29,9 @@ return [
     'product_deleted' => 'Product deleted successfully',
     'product_restored' => 'Product restored successfully',
     'product_force_deleted' => 'Product permanently deleted successfully',
+
+    // ===== Hero Section =====
+    'hero_updated' => 'Hero section updated successfully',
 
     // ===== Banners =====
     'banner_created' => 'Banner created successfully',
@@ -51,5 +55,12 @@ return [
     'order_status_updated' => 'Order status updated successfully',
     'order_products_required' => 'You must add at least one product to the order.',
     'order_product_not_found' => 'One of the selected products was not found.',
+
+    // ===== Uploads =====
+    // upload_too_large: PHP نفسه بيرفض الملف (upload_max_filesize/post_max_size بـ php.ini) قبل ما يوصل لفحص Laravel
+    'upload_too_large' => 'This file is too large for the server to accept right now. Please use a smaller image, or ask the site administrator to increase upload_max_filesize/post_max_size in php.ini and restart the server.',
+    'upload_partial' => 'The file was only partially uploaded. Please try again.',
+    'upload_failed' => 'This file could not be uploaded. Please try again with a different image.',
+    'request_too_large' => 'The total upload is too large for the server to accept right now. Please upload fewer or smaller images, or ask the site administrator to increase post_max_size in php.ini and restart the server.',
 
 ];

@@ -4,6 +4,7 @@ use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -32,5 +33,16 @@ return Application::configure(basePath: dirname(__DIR__))
         // يرجع دايماً JSON منسّق، مش صفحة HTML أو محاولة redirect لصفحة مش موجودة
         $exceptions->shouldRenderJsonWhen(function ($request, $throwable) {
             return $request->is('api/*') || $request->expectsJson();
+        });
+
+        // لما الطلب كامل (كل الملفات المرفوعة مع بعض) يتجاوز post_max_size بملف php.ini،
+        // PHP بيرفض الطلب قبل ما يوصل حتى لفحص Laravel، وبيطلع رسالة عامة "Payload Too Large".
+        // هون بنرجع رسالة عربي/إنجليزي واضحة بدل الرسالة الافتراضية.
+        $exceptions->render(function (PostTooLargeException $e, $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'message' => trans('messages.request_too_large'),
+                ], 413);
+            }
         });
     })->create();

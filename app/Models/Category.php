@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 // #[Fillable]: الأعمدة المسموح نعبيها جماعياً بـ Category::create([...]) أو $category->update([...])
 // أي عمود مش موجود هون، لو حاولنا نعبيه جماعياً Laravel رح يرفض (حماية من Mass Assignment)
-#[Fillable(['name_ar', 'name_en', 'image', 'description', 'status'])]
+#[Fillable(['name_ar', 'name_en', 'image', 'description', 'status', 'featured'])]
 class Category extends Model
 {
     use HasFactory;
@@ -19,6 +19,8 @@ class Category extends Model
         return [
             // status محفوظ بالداتابيز كـ 0/1 (tinyint) بس بالكود بيتحول تلقائياً لـ true/false
             'status' => 'boolean',
+            // featured: الأدمن بيحددها يدوياً - هاي التصنيفات يلي بتظهر بقسم "Main Categories" بالصفحة الرئيسية
+            'featured' => 'boolean',
         ];
     }
 
