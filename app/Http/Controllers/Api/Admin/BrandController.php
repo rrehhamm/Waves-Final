@@ -9,21 +9,10 @@ use App\Http\Resources\BrandResource;
 use App\Models\Brand;
 use App\Services\ImageUploadService;
 
-// نفس منطق CategoryController بالظبط، بس على جدول brands (والحقل logo بدل image)
-/**
- * @group Admin - Brands
- *
- * Full CRUD for brands. Deleting a brand that still has products (even soft-deleted
- * ones) is blocked with a 409 response listing the blocking products.
- * @authenticated
- */
 class BrandController extends Controller
 {
     public function __construct(protected ImageUploadService $imageService) {}
 
-    /**
-     * List brands
-     */
     public function index()
     {
         $brands = Brand::latest()->paginate(15);
@@ -31,22 +20,6 @@ class BrandController extends Controller
         return BrandResource::collection($brands);
     }
 
-    /**
-     * Create a brand
-     *
-     * @response 201 {
-     *   "success": true,
-     *   "message": "Brand created successfully",
-     *   "data": {
-     *     "id": 1, "name": "Nike", "logo": "http://127.0.0.1:8000/uploads/brands/abc123.jpg", "description": "Sportswear brand",
-     *     "status": true, "products": [], "created_at": "2026-07-20T10:00:00.000000Z", "updated_at": "2026-07-20T10:00:00.000000Z"
-     *   }
-     * }
-     * @response 422 scenario="Validation error" {
-     *   "message": "The name field is required.",
-     *   "errors": { "name": ["The name field is required."] }
-     * }
-     */
     public function store(StoreBrandRequest $request)
     {
         $data = $request->validated();
@@ -66,26 +39,11 @@ class BrandController extends Controller
         ], 201);
     }
 
-    /**
-     * Get a brand
-     */
     public function show(Brand $brand)
     {
         return new BrandResource($brand);
     }
 
-    /**
-     * Update a brand
-     *
-     * @response 200 {
-     *   "success": true,
-     *   "message": "Brand updated successfully",
-     *   "data": {
-     *     "id": 1, "name": "Nike", "logo": "http://127.0.0.1:8000/uploads/brands/abc123.jpg", "description": "Sportswear brand",
-     *     "status": true, "products": [], "created_at": "2026-07-20T10:00:00.000000Z", "updated_at": "2026-07-20T10:05:00.000000Z"
-     *   }
-     * }
-     */
     public function update(UpdateBrandRequest $request, Brand $brand)
     {
         $data = $request->validated();
@@ -103,27 +61,8 @@ class BrandController extends Controller
         ]);
     }
 
-    /**
-     * Delete a brand
-     *
-     * Returns 409 with a `blocking_products` list if the brand still has products.
-     *
-     * @response 200 {
-     *   "success": true,
-     *   "message": "Brand deleted successfully"
-     * }
-     * @response 409 scenario="Brand still has products" {
-     *   "success": false,
-     *   "message": "This brand cannot be deleted because it has associated products. Delete or reassign those products first.",
-     *   "blocking_products": [
-     *     { "id": 5, "name": "Running Shoes" }
-     *   ]
-     * }
-     */
     public function destroy(Brand $brand)
     {
-        // نفس منطق CategoryController::destroy - نتحقق قبل الحذف بدل ما نخلي MySQL يرمي خطأ خام
-        // withTrashed(): منتج محذوف Soft Delete لسا موجود فعلياً بالجدول ولسا بيمنع الحذف على مستوى MySQL
         $blockingProducts = $brand->products()->withTrashed()->get(['id', 'name_ar', 'name_en']);
 
         if ($blockingProducts->isNotEmpty()) {

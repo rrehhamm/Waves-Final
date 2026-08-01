@@ -10,7 +10,6 @@ export const AdminAuthProvider = ({ children }) => {
     const [token, setToken] = useState(() => localStorage.getItem('admin_token') || null);
     const [loading, setLoading] = useState(true);
 
-    // On app load, if an admin_token is already saved, verify it and load the admin's info
     useEffect(() => {
         const fetchAdmin = async () => {
             if (token) {
@@ -30,7 +29,6 @@ export const AdminAuthProvider = ({ children }) => {
         };
 
         fetchAdmin();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     const login = async (email, password) => {

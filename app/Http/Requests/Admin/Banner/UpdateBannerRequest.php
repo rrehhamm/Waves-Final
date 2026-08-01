@@ -21,7 +21,6 @@ class UpdateBannerRequest extends FormRequest
             'tag' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:25600'],
-            'link' => ['nullable', 'url', 'max:255'],
             'status' => ['nullable', 'boolean'],
         ];
     }

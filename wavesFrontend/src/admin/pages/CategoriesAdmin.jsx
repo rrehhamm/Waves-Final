@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import adminApi from '../api/adminApi';
 import Modal from '../components/Modal';
-import { Pencil, Trash2, Plus, Star } from 'lucide-react';
+import { Pencil, Trash2, Plus, Star, FolderTree, ImageOff } from 'lucide-react';
+import { Card, PageHeader, Button, IconButton, Badge, Input, Textarea, Toggle, EmptyState, TableSkeletonRow, FormError } from '../components/ui';
+import { useLanguage } from '../../context/LanguageContext';
 
 const emptyForm = { name_ar: '', name_en: '', description: '', status: true, featured: false, image: null };
 
 export default function CategoriesAdmin() {
+    const { t } = useLanguage();
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -24,7 +27,7 @@ export default function CategoriesAdmin() {
         adminApi
             .get('/categories')
             .then((res) => setCategories(res.data?.data || []))
-            .catch(() => setError('Failed to load categories.'))
+            .catch(() => setError(t('admin.categories.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -40,8 +43,6 @@ export default function CategoriesAdmin() {
 
     const openEdit = (cat) => {
         setEditing(cat);
-        // The list API only returns the already-translated "name" (not separate name_ar/name_en),
-        // so we pre-fill both language fields with it and let the admin adjust whichever needs editing.
         setForm({
             name_ar: cat.name || '',
             name_en: cat.name || '',
@@ -78,14 +79,14 @@ export default function CategoriesAdmin() {
             load();
         } catch (err) {
             const errors = err.response?.data?.errors;
-            setFormError(errors ? Object.values(errors).flat().join(' ') : 'Something went wrong. Please try again.');
+            setFormError(errors ? Object.values(errors).flat().join(' ') : t('admin.common.somethingWrong'));
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (cat) => {
-        if (!window.confirm(`Delete category "${cat.name}"?`)) return;
+        if (!window.confirm(`${t('admin.categories.deleteConfirm')} "${cat.name}"?`)) return;
         try {
             await adminApi.delete(`/categories/${cat.id}`);
             load();
@@ -93,126 +94,108 @@ export default function CategoriesAdmin() {
             if (err.response?.status === 409) {
                 setBlockingInfo({ category: cat, products: err.response.data?.blocking_products || [] });
             } else {
-                alert('Failed to delete category.');
+                alert(t('admin.categories.failedDelete'));
             }
         }
     };
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold">Categories</h1>
-                <button
-                    onClick={openCreate}
-                    type="button"
-                    className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800"
-                >
-                    <Plus size={16} /> New Category
-                </button>
-            </div>
+            <PageHeader
+                title={t('admin.categories.title')}
+                subtitle={t('admin.categories.subtitle')}
+                actions={
+                    <Button onClick={openCreate} icon={Plus}>
+                        {t('admin.categories.newCategory')}
+                    </Button>
+                }
+            />
 
-            {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
+            {error && <div className="mb-4"><FormError message={error} /></div>}
 
-            <div className="bg-white rounded-xl border overflow-x-auto">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-500 text-left">
-                        <tr>
-                            <th className="px-4 py-3">Image</th>
-                            <th className="px-4 py-3">Name</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Featured</th>
-                            <th className="px-4 py-3 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {loading ? (
+            <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="text-left border-b border-slate-100">
                             <tr>
-                                <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
-                                    Loading...
-                                </td>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.image')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.name')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.status')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.categories.featured')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('admin.common.actions')}</th>
                             </tr>
-                        ) : categories.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
-                                    No categories yet.
-                                </td>
-                            </tr>
-                        ) : (
-                            categories.map((cat) => (
-                                <tr key={cat.id}>
-                                    <td className="px-4 py-3">
-                                        {cat.image ? (
-                                            <img src={cat.image} alt={cat.name} className="w-10 h-10 rounded object-cover" />
-                                        ) : (
-                                            <div className="w-10 h-10 rounded bg-gray-100" />
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3 font-medium">{cat.name}</td>
-                                    <td className="px-4 py-3">
-                                        <span
-                                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                cat.status ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                                            }`}
-                                        >
-                                            {cat.status ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {cat.featured ? (
-                                            <Star size={16} className="text-amber-500 fill-amber-500" />
-                                        ) : (
-                                            <Star size={16} className="text-gray-300" />
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3 text-right space-x-3">
-                                        <button onClick={() => openEdit(cat)} type="button" className="text-gray-500 hover:text-gray-900">
-                                            <Pencil size={16} />
-                                        </button>
-                                        <button onClick={() => handleDelete(cat)} type="button" className="text-red-500 hover:text-red-700">
-                                            <Trash2 size={16} />
-                                        </button>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {loading ? (
+                                <TableSkeletonRow cols={5} />
+                            ) : categories.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5}>
+                                        <EmptyState icon={FolderTree} title={t('admin.categories.noCategories')} subtitle={t('admin.categories.createFirst')} />
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            ) : (
+                                categories.map((cat) => (
+                                    <tr key={cat.id} className="hover:bg-slate-50/70 transition-colors">
+                                        <td className="px-6 py-3">
+                                            {cat.image ? (
+                                                <img src={cat.image} alt={cat.name} className="w-10 h-10 rounded-lg object-cover" />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300">
+                                                    <ImageOff size={15} />
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-3 font-semibold text-slate-800">{cat.name}</td>
+                                        <td className="px-6 py-3">
+                                            <Badge tone={cat.status ? 'emerald' : 'slate'}>{cat.status ? t('admin.common.active') : t('admin.common.inactive')}</Badge>
+                                        </td>
+                                        <td className="px-6 py-3">
+                                            {cat.featured ? (
+                                                <Star size={16} className="text-amber-500 fill-amber-500" />
+                                            ) : (
+                                                <Star size={16} className="text-slate-200" />
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-3 text-right">
+                                            <div className="flex items-center justify-end gap-1.5">
+                                                <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(cat)} title={t('admin.common.edit')} />
+                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(cat)} title={t('admin.common.delete')} />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit Category' : 'New Category'}>
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('admin.categories.editCategory') : t('admin.categories.newCategory')}>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {formError && <p className="text-red-600 text-sm">{formError}</p>}
+                    <FormError message={formError} />
 
+                    <Input
+                        label={t('admin.categories.nameAr')}
+                        required
+                        value={form.name_ar}
+                        onChange={(e) => setForm({ ...form, name_ar: e.target.value })}
+                        dir="rtl"
+                    />
+                    <Input
+                        label={t('admin.categories.nameEn')}
+                        required
+                        value={form.name_en}
+                        onChange={(e) => setForm({ ...form, name_en: e.target.value })}
+                    />
+                    <Textarea
+                        label={t('admin.categories.description')}
+                        value={form.description}
+                        onChange={(e) => setForm({ ...form, description: e.target.value })}
+                        rows={3}
+                    />
                     <div>
-                        <label className="block text-sm font-medium mb-1">Name (Arabic)</label>
-                        <input
-                            required
-                            value={form.name_ar}
-                            onChange={(e) => setForm({ ...form, name_ar: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            dir="rtl"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Name (English)</label>
-                        <input
-                            required
-                            value={form.name_en}
-                            onChange={(e) => setForm({ ...form, name_en: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Description</label>
-                        <textarea
-                            value={form.description}
-                            onChange={(e) => setForm({ ...form, description: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            rows={3}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Image</label>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('admin.common.image')}</label>
                         <input
                             type="file"
                             accept="image/*"
@@ -221,55 +204,35 @@ export default function CategoriesAdmin() {
                                 setForm({ ...form, image: file });
                                 if (file) setImagePreview(URL.createObjectURL(file));
                             }}
-                            className="w-full text-sm"
+                            className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 file:text-xs file:font-semibold hover:file:bg-slate-200 file:cursor-pointer cursor-pointer"
                         />
-                        {imagePreview && <img src={imagePreview} alt="preview" className="mt-2 w-16 h-16 rounded object-cover" />}
+                        {imagePreview && <img src={imagePreview} alt="preview" className="mt-2.5 w-16 h-16 rounded-lg object-cover border border-slate-200" />}
                     </div>
-                    <div className="flex items-center gap-6">
-                        <label className="flex items-center gap-2 text-sm">
-                            <input
-                                type="checkbox"
-                                checked={form.status}
-                                onChange={(e) => setForm({ ...form, status: e.target.checked })}
-                            />
-                            Active
-                        </label>
-                        <label className="flex items-center gap-2 text-sm">
-                            <input
-                                type="checkbox"
-                                checked={form.featured}
-                                onChange={(e) => setForm({ ...form, featured: e.target.checked })}
-                            />
-                            Featured on homepage
-                        </label>
+                    <div className="flex items-center gap-6 pt-1">
+                        <Toggle label={t('admin.common.active')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+                        <Toggle label={t('admin.categories.featuredOnHome')} checked={form.featured} onChange={(v) => setForm({ ...form, featured: v })} />
                     </div>
-                    <div className="flex justify-end gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={() => setModalOpen(false)}
-                            className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50"
-                        >
-                            {saving ? 'Saving...' : 'Save'}
-                        </button>
+                    <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                        <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
+                            {t('admin.common.cancel')}
+                        </Button>
+                        <Button type="submit" disabled={saving}>
+                            {saving ? t('admin.common.saving') : t('admin.categories.saveCategory')}
+                        </Button>
                     </div>
                 </form>
             </Modal>
 
-            <Modal open={!!blockingInfo} onClose={() => setBlockingInfo(null)} title="Cannot delete category">
-                <p className="text-sm text-gray-600 mb-3">
-                    "{blockingInfo?.category?.name}" still has products attached. Reassign or delete those products first (Products
-                    page):
+            <Modal open={!!blockingInfo} onClose={() => setBlockingInfo(null)} title={t('admin.common.cannotDelete')}>
+                <p className="text-sm text-slate-500 mb-3">
+                    "{blockingInfo?.category?.name}" {t('admin.common.stillHasProducts')}
                 </p>
-                <ul className="text-sm list-disc pl-5 space-y-1">
+                <ul className="text-sm space-y-1.5">
                     {blockingInfo?.products?.map((p) => (
-                        <li key={p.id}>{p.name}</li>
+                        <li key={p.id} className="flex items-center gap-2 text-slate-700">
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                            {p.name}
+                        </li>
                     ))}
                 </ul>
             </Modal>

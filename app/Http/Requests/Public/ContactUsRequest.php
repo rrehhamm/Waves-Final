@@ -4,7 +4,6 @@ namespace App\Http\Requests\Public;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-// هاد Request مفتوح لأي زائر (مش محتاج تسجيل دخول) - عشان هيك حطيناه بفولدر Public
 class ContactUsRequest extends FormRequest
 {
     public function authorize(): bool

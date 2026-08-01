@@ -1,35 +1,35 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { useToast } from './ToastContext';
+import { useLanguage } from './LanguageContext';
+import { useSiteSettings } from './SiteSettingsContext';
 
-// Exported CartContext so direct useContext imports won't fail
 export const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-    // CartProvider is nested inside AuthProvider (see App.jsx), so this is safe to call here
     const { firstOrderDiscountEligible } = useAuth();
+    const { showToast } = useToast();
+    const { t } = useLanguage();
+    const { deliveryFee } = useSiteSettings();
 
-    // Load initial state from LocalStorage
     const [cartItems, setCartItems] = useState(() => {
         const savedCart = localStorage.getItem('waves_cart');
         return savedCart ? JSON.parse(savedCart) : [];
     });
 
     const [promoCode, setPromoCode] = useState('');
-    const deliveryFee = 15;
 
-    // The ONLY real discount is the automatic first-order 20% (server-enforced in
-    // OrderController::store - see backend). This mirrors it client-side purely so the
-    // Cart/Checkout pages can preview an accurate total before the order is placed.
     const discountPercent = firstOrderDiscountEligible ? 20 : 0;
 
-    // Sync to LocalStorage on changes
     useEffect(() => {
         localStorage.setItem('waves_cart', JSON.stringify(cartItems));
     }, [cartItems]);
 
     const addToCart = (product) => {
+        const productName = product.name_en || product.name;
+
         setCartItems((prevItems) => {
             const existing = prevItems.find((item) => item.id === product.id);
             if (existing) {
@@ -37,19 +37,28 @@ export const CartProvider = ({ children }) => {
                     item.id === product.id ? { ...item, quantity: item.quantity + (product.quantity || 1) } : item
                 );
             }
+            const hasDiscount =
+                Boolean(product.discount_percent) && product.final_price != null && Number(product.final_price) < Number(product.price);
+            const originalPrice = Number(product.price);
+            const unitPrice = hasDiscount ? Number(product.final_price) : originalPrice;
+
             return [
                 ...prevItems,
                 {
                     id: product.id,
-                    name: product.name_en || product.name,
+                    name: productName,
                     size: product.selectedSize || '42',
-                    color: product.selectedColor || 'White',
-                    price: product.price,
+                    color: product.selectedColor || null,
+                    originalPrice,
+                    price: unitPrice,
+                    discountPercent: hasDiscount ? Number(product.discount_percent) : 0,
                     quantity: product.quantity || 1,
                     image: product.main_image || product.image,
                 },
             ];
         });
+
+        showToast(t('cart.addedToast', { name: productName }));
     };
 
     const increaseQuantity = (id) => {
@@ -74,13 +83,23 @@ export const CartProvider = ({ children }) => {
         setCartItems([]);
     };
 
-    const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const discountAmount = Math.round(subtotal * (discountPercent / 100));
+    // subtotal is the true pre-discount total (original unit price x quantity for every item)
+    const subtotal = cartItems.reduce((acc, item) => acc + (item.originalPrice ?? item.price) * item.quantity, 0);
+
+    // product-level discounts (per-item original price vs discounted price)
+    const productDiscountAmount = cartItems.reduce(
+        (acc, item) => acc + ((item.originalPrice ?? item.price) - item.price) * item.quantity,
+        0
+    );
+
+    const firstOrderDiscountApplied = firstOrderDiscountEligible && cartItems.length > 0;
+    const firstOrderDiscountAmount = firstOrderDiscountApplied
+        ? Math.round((subtotal - productDiscountAmount) * (discountPercent / 100))
+        : 0;
+
+    const discountAmount = Math.round(productDiscountAmount + firstOrderDiscountAmount);
     const total = subtotal - discountAmount + (cartItems.length > 0 ? deliveryFee : 0);
 
-    // Legacy promo-code input on the Cart page: the real discount is now automatic
-    // (first_order_discount_eligible above), so this no longer stacks anything extra -
-    // kept as a harmless no-op so the existing Cart.jsx promo UI doesn't break.
     const applyPromo = () => {};
 
     return (
@@ -95,6 +114,9 @@ export const CartProvider = ({ children }) => {
                 subtotal,
                 discountPercent,
                 discountAmount,
+                productDiscountAmount,
+                firstOrderDiscountAmount,
+                firstOrderDiscountApplied,
                 deliveryFee,
                 total,
                 promoCode,

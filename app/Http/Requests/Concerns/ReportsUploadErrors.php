@@ -2,13 +2,6 @@
 
 namespace App\Http\Requests\Concerns;
 
-/**
- * أي Form Request فيها حقل صورة (image) بتحط عليها هاد الـ trait عشان لما PHP نفسه
- * (مش Laravel) يرفض ملف مرفوع بسبب حجمه (أكبر من upload_max_filesize أو post_max_size
- * بملف php.ini)، بدل ما يطلع للمستخدم رسالة عامة مو مفهومة زي "the main image field
- * must be an image" (وهو أصلاً مرفق صورة سليمة)، تطلع رسالة واضحة تشرح إنه المشكلة
- * حجم الملف/إعدادات السيرفر مش نوع الملف.
- */
 trait ReportsUploadErrors
 {
     public function withValidator($validator): void

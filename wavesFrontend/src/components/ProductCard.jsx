@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { formatCurrency } from '../utils/currency';
 
 import defaultProductImg from '../assets/prada-shoe.jpg';
 
@@ -9,14 +10,9 @@ const ProductCard = ({ product }) => {
         name = 'Prada Pumps',
         price = 145,
         oldPrice = null,
-        // discount_percent/final_price come from the backend's ProductResource when an admin
-        // has set a per-product discount (separate from the automatic first-order 20% discount)
         discount_percent = null,
         final_price = null,
         discount = discount_percent,
-        // The backend's ProductResource returns the image as `main_image`, not `image` -
-        // fall back through both so this card works whether it's fed raw API data or
-        // an already-transformed object.
         main_image,
         image = main_image || defaultProductImg,
     } = product || {};
@@ -25,7 +21,6 @@ const ProductCard = ({ product }) => {
 
     return (
         <div className="group flex flex-col w-full bg-white rounded-2xl p-3 border border-gray-100 shadow-sm hover:shadow-xl hover:border-[#AACDDC] transition-all duration-300">
-            {/* Product Image Container */}
             <Link to={`/products/${id}`} className="block w-full">
                 <div className="w-full aspect-square bg-[#F3E3D0]/30 rounded-xl overflow-hidden flex items-center justify-center p-4 relative">
                     <img
@@ -33,7 +28,7 @@ const ProductCard = ({ product }) => {
                         alt={name}
                         className="w-full h-full object-contain mix-blend-multiply group-hover:scale-108 transition-transform duration-500 ease-out"
                     />
-                    {(hasDiscount || discount) && (
+                    {(hasDiscount || Boolean(discount)) && (
                         <span className="absolute top-2.5 left-2.5 bg-[#81A6C6] text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm">
                             {typeof discount === 'number' ? `-${discount}%` : discount}
                         </span>
@@ -41,7 +36,6 @@ const ProductCard = ({ product }) => {
                 </div>
             </Link>
 
-            {/* Product Details */}
             <div className="mt-3 flex flex-col gap-1.5 px-1">
                 <Link to={`/products/${id}`}>
                     <h3 className="text-sm sm:text-base font-bold text-gray-900 truncate tracking-tight group-hover:text-[#81A6C6] transition-colors">
@@ -49,19 +43,18 @@ const ProductCard = ({ product }) => {
                     </h3>
                 </Link>
 
-                {/* Price - shows the admin-set discounted final_price when one applies */}
                 <div className="flex items-center gap-2 mt-1">
                     <span className="text-lg sm:text-xl font-black text-black tracking-tight">
-                        JD{hasDiscount ? final_price : price}
+                        {formatCurrency(hasDiscount ? final_price : price)}
                     </span>
 
                     {hasDiscount ? (
                         <span className="text-xs sm:text-sm font-semibold text-gray-400 line-through">
-                            JD{price}
+                            {formatCurrency(price)}
                         </span>
                     ) : oldPrice ? (
                         <span className="text-xs sm:text-sm font-semibold text-gray-400 line-through">
-                            JD{oldPrice}
+                            {formatCurrency(oldPrice)}
                         </span>
                     ) : null}
                 </div>

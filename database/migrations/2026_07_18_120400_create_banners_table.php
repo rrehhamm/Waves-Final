@@ -13,8 +13,8 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('image')->nullable();
-            $table->string('link')->nullable();     // رابط بيروح له البانر لما ينضغط (اختياري)
-            $table->boolean('status')->default(true); // active / inactive
+            $table->string('link')->nullable();
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }

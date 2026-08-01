@@ -14,11 +14,9 @@ return new class extends Migration
             $table->string('image');
             $table->text('description')->nullable();
 
-            // sort_order: رقم بيحدد ترتيب ظهور الصورة (0 = الأول، 1 = اللي بعده...)
-            // الأدمن بيقدر يغيّره من الداشبورد عشان يرتب الصور "Sort Images"
             $table->unsignedInteger('sort_order')->default(0);
 
-            $table->boolean('status')->default(true); // show / hide
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }

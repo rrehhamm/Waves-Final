@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import adminApi from '../api/adminApi';
+import { Card, PageHeader, Button, Input, Textarea, FormError, FormSuccess } from '../components/ui';
+import { PanelTop } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
-// The big top section on the storefront home page (background + badge + heading + paragraph +
-// two CTA buttons). Singleton - there is always exactly one row, edited in place (no list,
-// no create/delete). This is deliberately separate from the "Banners" page (the smaller promo
-// slider next to it, which IS a list - see BannersAdmin.jsx).
 const emptyForm = {
     badge_text: '',
     heading: '',
@@ -17,6 +16,7 @@ const emptyForm = {
 };
 
 export default function HeroSectionAdmin() {
+    const { t } = useLanguage();
     const [form, setForm] = useState(emptyForm);
     const [preview, setPreview] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -42,7 +42,7 @@ export default function HeroSectionAdmin() {
                 });
                 setPreview(hero.background_image || null);
             })
-            .catch(() => setError('Failed to load hero section.'))
+            .catch(() => setError(t('admin.hero.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -65,128 +65,126 @@ export default function HeroSectionAdmin() {
             if (form.background_image) fd.append('background_image', form.background_image);
 
             const res = await adminApi.post('/hero', fd);
-            setMessage('Hero section updated successfully.');
+            setMessage(t('admin.hero.updated'));
             const hero = res.data?.data;
             if (hero?.background_image) setPreview(hero.background_image);
         } catch (err) {
             const errors = err.response?.data?.errors;
-            setError(errors ? Object.values(errors).flat().join(' ') : 'Something went wrong. Please try again.');
+            setError(errors ? Object.values(errors).flat().join(' ') : t('admin.common.somethingWrong'));
         } finally {
             setSaving(false);
         }
     };
 
     if (loading) {
-        return <p className="text-gray-400">Loading...</p>;
+        return (
+            <div>
+                <PageHeader title={t('admin.hero.title')} />
+                <Card className="h-96 animate-pulse bg-slate-50" />
+            </div>
+        );
     }
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-2">Hero Section</h1>
-            <p className="text-sm text-gray-500 mb-6">
-                The large top section on the home page - background image, badge, heading, paragraph, and the two
-                buttons. This is separate from the small promo slider (Banners page).
-            </p>
+            <PageHeader
+                title={t('admin.hero.title')}
+                subtitle={t('admin.hero.subtitle')}
+            />
 
-            {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
-            {message && <p className="text-emerald-600 mb-4 text-sm">{message}</p>}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="lg:col-span-2 p-6">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <FormError message={error} />
+                        <FormSuccess message={message} />
 
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl border p-6 space-y-5 max-w-2xl">
-                <div>
-                    <label className="block text-sm font-medium mb-1">Badge text</label>
-                    <input
-                        value={form.badge_text}
-                        onChange={(e) => setForm({ ...form, badge_text: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                        placeholder="e.g. New Collection 2026"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium mb-1">Heading</label>
-                    <input
-                        required
-                        value={form.heading}
-                        onChange={(e) => setForm({ ...form, heading: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                        placeholder="e.g. Find What Matches Your Style"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium mb-1">Paragraph</label>
-                    <textarea
-                        value={form.subtext}
-                        onChange={(e) => setForm({ ...form, subtext: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                        rows={3}
-                    />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Button 1 text</label>
-                        <input
-                            value={form.button1_text}
-                            onChange={(e) => setForm({ ...form, button1_text: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            placeholder="e.g. Shop Collection"
+                        <Input
+                            label={t('admin.hero.badgeText')}
+                            value={form.badge_text}
+                            onChange={(e) => setForm({ ...form, badge_text: e.target.value })}
+                            placeholder={t('admin.hero.badgePlaceholder')}
                         />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Button 1 link</label>
-                        <input
-                            value={form.button1_link}
-                            onChange={(e) => setForm({ ...form, button1_link: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            placeholder="e.g. /products"
+                        <Input
+                            label={t('admin.hero.heading')}
+                            required
+                            value={form.heading}
+                            onChange={(e) => setForm({ ...form, heading: e.target.value })}
+                            placeholder={t('admin.hero.headingPlaceholder')}
                         />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Button 2 text</label>
-                        <input
-                            value={form.button2_text}
-                            onChange={(e) => setForm({ ...form, button2_text: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            placeholder="e.g. Explore Categories"
+                        <Textarea
+                            label={t('admin.hero.paragraph')}
+                            value={form.subtext}
+                            onChange={(e) => setForm({ ...form, subtext: e.target.value })}
+                            rows={3}
                         />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Button 2 link</label>
-                        <input
-                            value={form.button2_link}
-                            onChange={(e) => setForm({ ...form, button2_link: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            placeholder="e.g. /categories"
-                        />
-                    </div>
-                </div>
 
-                <div>
-                    <label className="block text-sm font-medium mb-1">Background image (leave empty to keep current)</label>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                            const file = e.target.files?.[0] || null;
-                            setForm({ ...form, background_image: file });
-                            if (file) setPreview(URL.createObjectURL(file));
-                        }}
-                        className="w-full text-sm"
-                    />
-                    {preview && <img src={preview} alt="preview" className="mt-3 w-full max-w-md h-40 rounded-lg object-cover" />}
-                </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label={t('admin.hero.button1Text')}
+                                value={form.button1_text}
+                                onChange={(e) => setForm({ ...form, button1_text: e.target.value })}
+                                placeholder="e.g. Shop Collection"
+                            />
+                            <Input
+                                label={t('admin.hero.button1Link')}
+                                value={form.button1_link}
+                                onChange={(e) => setForm({ ...form, button1_link: e.target.value })}
+                                placeholder="e.g. /products"
+                            />
+                            <Input
+                                label={t('admin.hero.button2Text')}
+                                value={form.button2_text}
+                                onChange={(e) => setForm({ ...form, button2_text: e.target.value })}
+                                placeholder="e.g. Explore Categories"
+                            />
+                            <Input
+                                label={t('admin.hero.button2Link')}
+                                value={form.button2_link}
+                                onChange={(e) => setForm({ ...form, button2_link: e.target.value })}
+                                placeholder="e.g. /categories"
+                            />
+                        </div>
 
-                <div className="flex justify-end pt-2">
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="px-6 py-2.5 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50"
-                    >
-                        {saving ? 'Saving...' : 'Save Changes'}
-                    </button>
-                </div>
-            </form>
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                                {t('admin.hero.backgroundImage')} {t('admin.common.keepCurrentImage')}
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0] || null;
+                                    setForm({ ...form, background_image: file });
+                                    if (file) setPreview(URL.createObjectURL(file));
+                                }}
+                                className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 file:text-xs file:font-semibold hover:file:bg-slate-200 file:cursor-pointer cursor-pointer"
+                            />
+                        </div>
+
+                        <div className="flex justify-end pt-3 border-t border-slate-100">
+                            <Button type="submit" disabled={saving}>
+                                {saving ? t('admin.common.saving') : t('admin.hero.saveChanges')}
+                            </Button>
+                        </div>
+                    </form>
+                </Card>
+
+                <Card className="p-5 h-fit">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">{t('admin.hero.livePreview')}</p>
+                    {preview ? (
+                        <img src={preview} alt="preview" className="w-full h-48 rounded-xl object-cover border border-slate-200" />
+                    ) : (
+                        <div className="w-full h-48 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300">
+                            <PanelTop size={28} />
+                        </div>
+                    )}
+                    <div className="mt-4 space-y-1">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[#3A5A73]">{form.badge_text || t('admin.hero.badgePreview')}</p>
+                        <p className="text-sm font-extrabold text-slate-900 leading-snug">{form.heading || t('admin.hero.headingPreview')}</p>
+                        <p className="text-xs text-slate-400 line-clamp-2">{form.subtext || t('admin.hero.paragraphPreview')}</p>
+                    </div>
+                </Card>
+            </div>
         </div>
     );
 }

@@ -1,4 +1,3 @@
-/* --- HERO BANNER LAYOUT --- */
 .hero-banner {
   position: relative;
   display: flex;
@@ -64,7 +63,6 @@
   color: #666;
 }
 
-/* --- HERO ANIMATED SHOWCASE BOX --- */
 .hero-showcase-box {
   position: relative;
   width: 380px;
@@ -149,7 +147,6 @@
   font-weight: bold;
 }
 
-/* --- BRANDS STRIP --- */
 .brands-strip {
   background-color: #000;
   color: #fff;
@@ -166,7 +163,6 @@
   letter-spacing: 2px;
 }
 
-/* --- MAIN CATEGORIES BENTO GRID --- */
 .main-categories-section {
   padding: 60px 8%;
   background-color: var(--color-light-blue);
@@ -214,7 +210,6 @@
   font-weight: bold;
 }
 
-/* --- FEATURED PRODUCTS & GALLERY PREVIEW --- */
 .featured-products-section,
 .gallery-preview-section {
   padding: 40px 8%;
@@ -260,7 +255,6 @@
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
-/* --- PRODUCTS PAGE LAYOUT --- */
 .products-page-container {
   padding: 30px 8%;
 }
@@ -281,7 +275,6 @@
   gap: 30px;
 }
 
-/* --- SIDEBAR FILTERS --- */
 .filters-sidebar {
   width: 260px;
   flex-shrink: 0;
@@ -362,7 +355,6 @@
   margin-top: 5px;
 }
 
-/* --- PRODUCTS FEED & TOP BAR --- */
 .products-main-content {
   flex-grow: 1;
 }
@@ -406,7 +398,6 @@
   gap: 20px;
 }
 
-/* --- PRODUCT CARD STYLE --- */
 .product-card {
   background: #fff;
   border-radius: 16px;
@@ -480,7 +471,6 @@
   font-weight: bold;
 }
 
-/* --- PAGINATION --- */
 .pagination {
   display: flex;
   justify-content: center;
@@ -504,7 +494,6 @@
   border-color: #000;
 }
 
-/* --- RESPONSIVE MOBILE STYLING --- */
 @media (max-width: 850px) {
   .products-layout {
     flex-direction: column;
@@ -535,9 +524,6 @@
   }
 }
 
-/* ==========================================
-   CART PAGE STYLES
-   ========================================== */
 .cart-page-container {
   padding: 30px 8%;
 }
@@ -622,7 +608,6 @@
   font-weight: bold;
 }
 
-/* Order Summary Box */
 .order-summary-card {
   background: #fff;
   border: 1px solid #e2e8f0;
@@ -688,9 +673,6 @@
   cursor: pointer;
 }
 
-/* ==========================================
-   GALLERY PAGE STYLES
-   ========================================== */
 .gallery-page-container {
   padding: 30px 8%;
 }
@@ -743,7 +725,6 @@
   cursor: pointer;
 }
 
-/* Fullscreen Modal */
 .gallery-modal {
   position: fixed;
   inset: 0;
@@ -794,7 +775,6 @@
   }
 }
 
-/* --- HOME HERO & BRANDS --- */
 .hero-section {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
@@ -909,9 +889,6 @@
   text-decoration: none;
 }
 
-/* ==========================================
-   GLOBAL NAVBAR & FOOTER
-   ========================================== */
 .announcement-bar {
   background: #000;
   color: #fff;
@@ -991,7 +968,6 @@
   color: #000;
 }
 
-/* Footer Styling */
 .main-footer {
   background: #f8fafc;
   padding: 60px 8% 20px;
@@ -1058,9 +1034,6 @@
   color: #000;
 }
 
-/* ==========================================
-   CONTACT US PAGE
-   ========================================== */
 .contact-page-container {
   padding: 30px 8%;
 }
@@ -1174,7 +1147,6 @@
   margin-top: 0;
 }
 
-/* Responsive Rules */
 @media (max-width: 950px) {
 
   .nav-links,

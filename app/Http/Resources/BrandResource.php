@@ -10,11 +10,10 @@ class BrandResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name, // البراند اسم واحد بس (مش مترجم حسب المواصفات)
+            'name' => $this->name,
             'logo' => image_url($this->logo),
             'description' => $this->description,
             'status' => (bool) $this->status,
-            // featured: البراندات يلي الأدمن اختارها تظهر بقسم "Featured Brands" بالصفحة الرئيسية
             'featured' => (bool) $this->featured,
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'created_at' => $this->created_at,

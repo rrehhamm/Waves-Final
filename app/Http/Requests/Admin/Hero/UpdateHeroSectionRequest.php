@@ -24,7 +24,6 @@ class UpdateHeroSectionRequest extends FormRequest
             'button1_link' => ['nullable', 'string', 'max:255'],
             'button2_text' => ['nullable', 'string', 'max:100'],
             'button2_link' => ['nullable', 'string', 'max:255'],
-            // background_image: اختيارية - لو ما انبعتش، بتضل الصورة الحالية متل ما هي (شوف Controller)
             'background_image' => ['nullable', 'image', 'max:25600'],
         ];
     }

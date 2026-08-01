@@ -6,24 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\HeroSectionResource;
 use App\Models\HeroSection;
 
-/**
- * @group Public - Hero Section
- *
- * Open endpoint, no login required - powers the home page's top hero section.
- */
 class HeroSectionController extends Controller
 {
-    /**
-     * Get the hero section
-     *
-     * GET /api/hero
-     */
     public function show()
     {
         $hero = HeroSection::first();
 
-        // No admin has ever visited /admin/hero yet (so no row was auto-created there) -
-        // return sensible defaults instead of a 404, so the storefront never shows a blank hero
         if (! $hero) {
             $hero = new HeroSection([
                 'badge_text' => 'New Collection 2026',

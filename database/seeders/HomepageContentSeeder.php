@@ -8,17 +8,6 @@ use App\Models\Category;
 use App\Models\HeroSection;
 use Illuminate\Database\Seeder;
 
-// بيعبي الداتابيز بالتصنيفات/البراندات/قسم الهيرو/سلايدر البانرات يلي كانوا ثابتين (hardcoded)
-// بالفرونت إند (MAIN_CATEGORIES بـ CategoryCard.jsx، MAIN_BRANDS بـ BrandCard.jsx، نص وخلفية
-// الهيرو بـ Home.jsx) عشان تصير موجودة فعلياً بالداتابيز والأدمن يقدر يعدّلها/يحذفها من الداشبورد
-// (قبل هيك كانت بس أرقام/نصوص ثابتة بالكود، مش صفوف حقيقية - لهيك ما كانت تظهر بالداشبورد)
-//
-// ملاحظة مهمة: "الهيرو" (القسم الكبير بالخلفية والعنوان الكبير) و"البانرات" (سلايدر البروموشن
-// الصغير جنبه) شيئين منفصلين تماماً بالباك إند - hero_sections جدول Singleton لحاله،
-// و banners جدول عادي فيه أكتر من صف (سلايدات).
-//
-// الصور تم نسخها يدوياً لـ storage/app/uploads/{categories,brands,banners,hero}/
-// من wavesFrontend/src/assets، فمسارها هون بيطابق فعلياً وين موجودة عالقرص.
 class HomepageContentSeeder extends Seeder
 {
     public function run(): void
@@ -51,7 +40,6 @@ class HomepageContentSeeder extends Seeder
         ];
 
         foreach ($categories as $data) {
-            // updateOrCreate بالاسم الإنجليزي: لو شغّلنا السيدر أكتر من مرة ما بيتكرر نفس التصنيف
             Category::updateOrCreate(
                 ['name_en' => $data['name_en']],
                 [
@@ -59,7 +47,6 @@ class HomepageContentSeeder extends Seeder
                     'description' => $data['description'],
                     'image' => $data['image'],
                     'status' => true,
-                    // featured => true: عشان تظهر مباشرة بقسم "Main Categories" بالصفحة الرئيسية
                     'featured' => true,
                 ]
             );
@@ -95,19 +82,15 @@ class HomepageContentSeeder extends Seeder
                     'description' => $data['description'],
                     'logo' => $data['logo'],
                     'status' => true,
-                    // featured => true: عشان تظهر مباشرة بقسم "Featured Brands" بالصفحة الرئيسية
                     'featured' => true,
                 ]
             );
         }
 
-        // تنظيف: أي نسخة قديمة من بانر "New Collection 2026" كانت تمثّل غلط قسم الهيرو
-        // (قبل ما نفصل hero_sections عن banners) - محتواها الحقيقي هلق تحت بقسم الهيرو تحت.
         Banner::where('title', 'New Collection 2026')
             ->where('image', 'banners/banner-bg.jpg')
             ->delete();
 
-        // قسم الهيرو الكبير أعلى الصفحة الرئيسية - Singleton (id=1 دايماً)
         HeroSection::updateOrCreate(
             ['id' => 1],
             [
@@ -122,7 +105,6 @@ class HomepageContentSeeder extends Seeder
             ]
         );
 
-        // سلايدر البروموشن الصغير جنب الهيرو (مثال جاهز يقدر الأدمن يعدّله/يحذفه)
         $banners = [
             [
                 'title' => 'New Season Styles',
@@ -145,7 +127,6 @@ class HomepageContentSeeder extends Seeder
                     'tag' => $data['tag'],
                     'description' => $data['description'],
                     'image' => $data['image'],
-                    'link' => null,
                     'status' => true,
                 ]
             );

@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import adminApi from '../api/adminApi';
 import Modal from '../components/Modal';
-import { Eye, Trash2, Mail, MailOpen } from 'lucide-react';
+import { Eye, Trash2, Mail, MailOpen, Phone } from 'lucide-react';
+import { Card, PageHeader, IconButton, EmptyState, TableSkeletonRow, FormError } from '../components/ui';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function ContactMessagesAdmin() {
+    const { t } = useLanguage();
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -14,7 +17,7 @@ export default function ContactMessagesAdmin() {
         adminApi
             .get('/contact-messages')
             .then((res) => setMessages(res.data?.data || []))
-            .catch(() => setError('Failed to load contact messages.'))
+            .catch(() => setError(t('admin.messages.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -27,104 +30,127 @@ export default function ContactMessagesAdmin() {
                 await adminApi.patch(`/contact-messages/${msg.id}/mark-as-read`);
                 load();
             } catch {
-                // non-critical, ignore
             }
         }
     };
 
     const handleDelete = async (msg) => {
-        if (!window.confirm(`Delete message from "${msg.name}"?`)) return;
+        if (!window.confirm(`${t('admin.messages.deleteConfirm')} "${msg.name}"?`)) return;
         try {
             await adminApi.delete(`/contact-messages/${msg.id}`);
             if (viewing?.id === msg.id) setViewing(null);
             load();
         } catch {
-            alert('Failed to delete message.');
+            alert(t('admin.messages.failedDelete'));
         }
     };
 
+    const unreadCount = messages.filter((m) => !m.is_read).length;
+
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-6">Contact Messages</h1>
+            <PageHeader
+                title={t('admin.messages.title')}
+                subtitle={unreadCount > 0 ? t(unreadCount === 1 ? 'admin.messages.unreadCount' : 'admin.messages.unreadCountPlural', { count: unreadCount }) : t('admin.messages.allRead')}
+            />
 
-            {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
+            {error && <div className="mb-4"><FormError message={error} /></div>}
 
-            <div className="bg-white rounded-xl border overflow-x-auto">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-500 text-left">
-                        <tr>
-                            <th className="px-4 py-3"></th>
-                            <th className="px-4 py-3">Name</th>
-                            <th className="px-4 py-3">Contact</th>
-                            <th className="px-4 py-3">Message</th>
-                            <th className="px-4 py-3">Received</th>
-                            <th className="px-4 py-3 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {loading ? (
+            <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="text-left border-b border-slate-100">
                             <tr>
-                                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
-                                    Loading...
-                                </td>
+                                <th className="px-6 py-3.5 w-10"></th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.messages.name')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.messages.contact')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.messages.message')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.messages.received')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('admin.common.actions')}</th>
                             </tr>
-                        ) : messages.length === 0 ? (
-                            <tr>
-                                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
-                                    No messages yet.
-                                </td>
-                            </tr>
-                        ) : (
-                            messages.map((m) => (
-                                <tr key={m.id} className={!m.is_read ? 'bg-blue-50/40 font-medium' : ''}>
-                                    <td className="px-4 py-3">
-                                        {m.is_read ? (
-                                            <MailOpen size={16} className="text-gray-300" />
-                                        ) : (
-                                            <Mail size={16} className="text-blue-500" />
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3">{m.name}</td>
-                                    <td className="px-4 py-3 text-gray-500">
-                                        {m.email}
-                                        {m.phone ? ` · ${m.phone}` : ''}
-                                    </td>
-                                    <td className="px-4 py-3 text-gray-500 max-w-xs truncate">{m.message}</td>
-                                    <td className="px-4 py-3 text-gray-500">
-                                        {m.created_at ? new Date(m.created_at).toLocaleDateString() : '—'}
-                                    </td>
-                                    <td className="px-4 py-3 text-right space-x-3">
-                                        <button onClick={() => openMessage(m)} type="button" className="text-gray-500 hover:text-gray-900" title="View">
-                                            <Eye size={16} />
-                                        </button>
-                                        <button onClick={() => handleDelete(m)} type="button" className="text-red-500 hover:text-red-700" title="Delete">
-                                            <Trash2 size={16} />
-                                        </button>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {loading ? (
+                                <TableSkeletonRow cols={6} />
+                            ) : messages.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6}>
+                                        <EmptyState icon={Mail} title={t('admin.messages.noMessages')} subtitle={t('admin.messages.noMessagesHint')} />
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            ) : (
+                                messages.map((m) => (
+                                    <tr
+                                        key={m.id}
+                                        onClick={() => openMessage(m)}
+                                        className={`cursor-pointer transition-colors ${!m.is_read ? 'bg-[#81A6C6]/8 hover:bg-[#81A6C6]/12' : 'hover:bg-slate-50/70'}`}
+                                    >
+                                        <td className="px-6 py-3.5">
+                                            {m.is_read ? (
+                                                <MailOpen size={16} className="text-slate-300" />
+                                            ) : (
+                                                <span className="relative inline-flex">
+                                                    <Mail size={16} className="text-[#4E7699]" />
+                                                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#4E7699]" />
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className={`px-6 py-3.5 ${!m.is_read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                                            {m.name}
+                                        </td>
+                                        <td className="px-6 py-3.5 text-slate-500">
+                                            {m.email}
+                                            {m.phone ? ` · ${m.phone}` : ''}
+                                        </td>
+                                        <td className="px-6 py-3.5 text-slate-500 max-w-xs truncate">{m.message}</td>
+                                        <td className="px-6 py-3.5 text-slate-400">
+                                            {m.created_at ? new Date(m.created_at).toLocaleDateString() : '—'}
+                                        </td>
+                                        <td className="px-6 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center justify-end gap-1.5">
+                                                <IconButton icon={Eye} tone="primary" onClick={() => openMessage(m)} title={t('admin.common.view')} />
+                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(m)} title={t('admin.common.delete')} />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
 
-            <Modal open={!!viewing} onClose={() => setViewing(null)} title={viewing?.name}>
+            <Modal open={!!viewing} onClose={() => setViewing(null)} title={viewing?.name} subtitle={t('admin.messages.title')}>
                 {viewing && (
-                    <div className="space-y-3 text-sm">
-                        <div>
-                            <span className="text-gray-400">Email:</span> {viewing.email}
-                        </div>
-                        {viewing.phone && (
-                            <div>
-                                <span className="text-gray-400">Phone:</span> {viewing.phone}
+                    <div className="space-y-4 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="rounded-xl bg-slate-50 px-3.5 py-2.5">
+                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('admin.messages.email')}</span>
+                                <span className="text-slate-800 font-medium">{viewing.email}</span>
                             </div>
-                        )}
-                        <div>
-                            <span className="text-gray-400">Received:</span>{' '}
-                            {viewing.created_at ? new Date(viewing.created_at).toLocaleString() : '—'}
+                            {viewing.phone && (
+                                <div className="rounded-xl bg-slate-50 px-3.5 py-2.5">
+                                    <span className="text-xs text-slate-400 font-semibold block mb-0.5 flex items-center gap-1">
+                                        <Phone size={11} /> {t('admin.messages.phone')}
+                                    </span>
+                                    <span className="text-slate-800 font-medium">{viewing.phone}</span>
+                                </div>
+                            )}
                         </div>
-                        <div className="pt-2 border-t">
-                            <p className="whitespace-pre-wrap">{viewing.message}</p>
+                        <div className="text-xs text-slate-400">
+                            {t('admin.messages.received')} {viewing.created_at ? new Date(viewing.created_at).toLocaleString() : '—'}
+                        </div>
+                        <div className="pt-3 border-t border-slate-100">
+                            <p className="whitespace-pre-wrap text-slate-700 leading-relaxed">{viewing.message}</p>
+                        </div>
+                        <div className="flex justify-end pt-2">
+                            <button
+                                onClick={() => handleDelete(viewing)}
+                                type="button"
+                                className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-600 hover:text-rose-700"
+                            >
+                                <Trash2 size={15} /> {t('admin.messages.deleteMessage')}
+                            </button>
                         </div>
                     </div>
                 )}

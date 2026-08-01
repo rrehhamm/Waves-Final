@@ -11,14 +11,12 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
 
-            // دعم لغتين (متطلب رقم 14 بالمواصفات): كل حقل نصي بينكتب بعربي وإنجليزي
             $table->string('name_ar');
             $table->string('name_en');
 
-            $table->string('image')->nullable();        // بنخزن هون بس المسار (path) مش الصورة نفسها
-            $table->text('description')->nullable();     // وصف اختياري (nullable = ممكن يكون فاضي)
+            $table->string('image')->nullable();
+            $table->text('description')->nullable();
 
-            // status: true = active (ظاهرة للزوار) / false = inactive (مخفية)
             $table->boolean('status')->default(true);
 
             $table->timestamps();

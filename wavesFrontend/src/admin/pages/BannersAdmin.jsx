@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import adminApi from '../api/adminApi';
 import Modal from '../components/Modal';
-import { Pencil, Trash2, Plus, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Pencil, Trash2, Plus, ToggleLeft, ToggleRight, ImageIcon } from 'lucide-react';
+import { Card, PageHeader, Button, IconButton, Badge, Input, Textarea, Toggle, EmptyState, FormError } from '../components/ui';
+import { useLanguage } from '../../context/LanguageContext';
 
-const emptyForm = { title: '', tag: '', description: '', link: '', status: true, image: null };
+const emptyForm = { title: '', tag: '', description: '', status: true, image: null };
 
 export default function BannersAdmin() {
+    const { t } = useLanguage();
     const [banners, setBanners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -22,7 +25,7 @@ export default function BannersAdmin() {
         adminApi
             .get('/banners')
             .then((res) => setBanners(res.data?.data || []))
-            .catch(() => setError('Failed to load banners.'))
+            .catch(() => setError(t('admin.banners.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -42,7 +45,6 @@ export default function BannersAdmin() {
             title: banner.title || '',
             tag: banner.tag || '',
             description: banner.description || '',
-            link: banner.link || '',
             status: banner.status,
             image: null,
         });
@@ -60,7 +62,6 @@ export default function BannersAdmin() {
             fd.append('title', form.title);
             fd.append('tag', form.tag || '');
             fd.append('description', form.description || '');
-            fd.append('link', form.link || '');
             fd.append('status', form.status ? '1' : '0');
             if (form.image) fd.append('image', form.image);
 
@@ -74,19 +75,19 @@ export default function BannersAdmin() {
             load();
         } catch (err) {
             const errors = err.response?.data?.errors;
-            setFormError(errors ? Object.values(errors).flat().join(' ') : 'Something went wrong. Please try again.');
+            setFormError(errors ? Object.values(errors).flat().join(' ') : t('admin.common.somethingWrong'));
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (banner) => {
-        if (!window.confirm(`Delete banner "${banner.title}"?`)) return;
+        if (!window.confirm(`${t('admin.banners.deleteConfirm')} "${banner.title}"?`)) return;
         try {
             await adminApi.delete(`/banners/${banner.id}`);
             load();
         } catch {
-            alert('Failed to delete banner.');
+            alert(t('admin.banners.failedDelete'));
         }
     };
 
@@ -95,116 +96,103 @@ export default function BannersAdmin() {
             await adminApi.patch(`/banners/${banner.id}/toggle-status`);
             load();
         } catch {
-            alert('Failed to toggle banner status.');
+            alert(t('admin.banners.failedToggle'));
         }
     };
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold">Banners</h1>
-                <button
-                    onClick={openCreate}
-                    type="button"
-                    className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800"
-                >
-                    <Plus size={16} /> New Banner
-                </button>
-            </div>
+            <PageHeader
+                title={t('admin.banners.title')}
+                subtitle={t('admin.banners.subtitle')}
+                actions={
+                    <Button onClick={openCreate} icon={Plus}>
+                        {t('admin.banners.newBanner')}
+                    </Button>
+                }
+            />
 
-            {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
+            {error && <div className="mb-4"><FormError message={error} /></div>}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {loading ? (
-                    <p className="text-gray-400 col-span-full text-center py-6">Loading...</p>
-                ) : banners.length === 0 ? (
-                    <p className="text-gray-400 col-span-full text-center py-6">No banners yet.</p>
-                ) : (
-                    banners.map((b) => (
-                        <div key={b.id} className="bg-white rounded-xl border overflow-hidden">
-                            {b.image && <img src={b.image} alt={b.title} className="w-full h-32 object-cover" />}
-                            <div className="p-4">
-                                <div className="flex items-start justify-between gap-2">
-                                    <div>
-                                        {b.tag && (
-                                            <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full mb-1">
-                                                {b.tag}
-                                            </span>
-                                        )}
-                                        <h3 className="font-semibold">{b.title}</h3>
+            {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <Card key={i} className="h-56 animate-pulse bg-slate-50" />
+                    ))}
+                </div>
+            ) : banners.length === 0 ? (
+                <Card>
+                    <EmptyState icon={ImageIcon} title={t('admin.banners.noBanners')} subtitle={t('admin.banners.addFirst')} />
+                </Card>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {banners.map((b) => (
+                        <Card key={b.id} className="overflow-hidden group hover:shadow-md transition-shadow duration-200">
+                            <div className="relative h-36 bg-slate-100">
+                                {b.image ? (
+                                    <img src={b.image} alt={b.title} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                        <ImageIcon size={24} />
                                     </div>
-                                    <span
-                                        className={`px-2 py-1 rounded-full text-xs font-medium shrink-0 ${
-                                            b.status ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                                        }`}
-                                    >
-                                        {b.status ? 'Active' : 'Inactive'}
-                                    </span>
-                                </div>
-                                {b.description && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{b.description}</p>}
-                                <div className="flex items-center gap-3 mt-3">
-                                    <button onClick={() => handleToggle(b)} type="button" className="text-gray-500 hover:text-gray-900" title="Toggle active">
-                                        {b.status ? <ToggleRight size={20} className="text-green-600" /> : <ToggleLeft size={20} />}
-                                    </button>
-                                    <button onClick={() => openEdit(b)} type="button" className="text-gray-500 hover:text-gray-900" title="Edit">
-                                        <Pencil size={16} />
-                                    </button>
-                                    <button onClick={() => handleDelete(b)} type="button" className="text-red-500 hover:text-red-700" title="Delete">
-                                        <Trash2 size={16} />
-                                    </button>
+                                )}
+                                <div className="absolute top-2.5 right-2.5">
+                                    <Badge tone={b.status ? 'emerald' : 'slate'} className="shadow-sm">
+                                        {b.status ? t('admin.common.active') : t('admin.common.inactive')}
+                                    </Badge>
                                 </div>
                             </div>
-                        </div>
-                    ))
-                )}
-            </div>
+                            <div className="p-4">
+                                {b.tag && (
+                                    <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#3A5A73] bg-[#81A6C6]/12 px-2 py-0.5 rounded-full mb-1.5">
+                                        {b.tag}
+                                    </span>
+                                )}
+                                <h3 className="font-bold text-slate-900 text-sm truncate">{b.title}</h3>
+                                {b.description && <p className="text-xs text-slate-400 mt-1 line-clamp-2">{b.description}</p>}
+                                <div className="flex items-center gap-1 mt-3.5 pt-3 border-t border-slate-100">
+                                    <IconButton
+                                        icon={b.status ? ToggleRight : ToggleLeft}
+                                        tone={b.status ? 'success' : 'default'}
+                                        onClick={() => handleToggle(b)}
+                                        title={t('admin.banners.toggleActive')}
+                                    />
+                                    <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(b)} title={t('admin.common.edit')} />
+                                    <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(b)} title={t('admin.common.delete')} className="ml-auto" />
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+            )}
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit Banner' : 'New Banner'}>
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('admin.banners.editBanner') : t('admin.banners.newBanner')}>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {formError && <p className="text-red-600 text-sm">{formError}</p>}
+                    <FormError message={formError} />
 
+                    <Input
+                        label={t('admin.banners.tag')}
+                        value={form.tag}
+                        onChange={(e) => setForm({ ...form, tag: e.target.value })}
+                        placeholder={t('admin.banners.tagPlaceholder')}
+                    />
+                    <Input
+                        label={t('admin.banners.titleField')}
+                        required
+                        value={form.title}
+                        onChange={(e) => setForm({ ...form, title: e.target.value })}
+                        placeholder="e.g. New Summer Arrivals"
+                    />
+                    <Textarea
+                        label={t('admin.banners.highlightText')}
+                        value={form.description}
+                        onChange={(e) => setForm({ ...form, description: e.target.value })}
+                        rows={2}
+                        placeholder="e.g. UP TO 40% OFF"
+                    />
                     <div>
-                        <label className="block text-sm font-medium mb-1">Tag / Badge</label>
-                        <input
-                            value={form.tag}
-                            onChange={(e) => setForm({ ...form, tag: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            placeholder="e.g. Trending Now"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Title (heading)</label>
-                        <input
-                            required
-                            value={form.title}
-                            onChange={(e) => setForm({ ...form, title: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            placeholder="e.g. New Summer Arrivals"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Highlight text (e.g. discount)</label>
-                        <textarea
-                            value={form.description}
-                            onChange={(e) => setForm({ ...form, description: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            rows={2}
-                            placeholder="e.g. UP TO 40% OFF"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Link URL</label>
-                        <input
-                            type="url"
-                            value={form.link}
-                            onChange={(e) => setForm({ ...form, link: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            placeholder="https://..."
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Image {editing ? '(leave empty to keep current)' : ''}
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                            {t('admin.common.image')} {editing ? t('admin.common.keepCurrentImage') : ''}
                         </label>
                         <input
                             type="file"
@@ -214,29 +202,18 @@ export default function BannersAdmin() {
                                 setForm({ ...form, image: file });
                                 if (file) setPreview(URL.createObjectURL(file));
                             }}
-                            className="w-full text-sm"
+                            className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 file:text-xs file:font-semibold hover:file:bg-slate-200 file:cursor-pointer cursor-pointer"
                         />
-                        {preview && <img src={preview} alt="preview" className="mt-2 w-24 h-16 rounded object-cover" />}
+                        {preview && <img src={preview} alt="preview" className="mt-2.5 w-28 h-16 rounded-lg object-cover border border-slate-200" />}
                     </div>
-                    <label className="flex items-center gap-2 text-sm">
-                        <input type="checkbox" checked={form.status} onChange={(e) => setForm({ ...form, status: e.target.checked })} />
-                        Active
-                    </label>
-                    <div className="flex justify-end gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={() => setModalOpen(false)}
-                            className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50"
-                        >
-                            {saving ? 'Saving...' : 'Save'}
-                        </button>
+                    <Toggle label={t('admin.common.active')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+                    <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                        <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
+                            {t('admin.common.cancel')}
+                        </Button>
+                        <Button type="submit" disabled={saving}>
+                            {saving ? t('admin.common.saving') : t('admin.banners.saveBanner')}
+                        </Button>
                     </div>
                 </form>
             </Modal>

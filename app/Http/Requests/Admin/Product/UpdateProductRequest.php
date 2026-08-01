@@ -26,8 +26,13 @@ class UpdateProductRequest extends FormRequest
             'discount_percent' => ['nullable', 'integer', 'min:0', 'max:100'],
             'quantity' => ['required', 'integer', 'min:0'],
 
-            // بالتحديث: الصورة اختيارية (إذا ما انبعتت، بتضل الصورة القديمة زي ما هي)
-            // max:25600 = 25 ميجا (لازم upload_max_filesize/post_max_size بـ php.ini كمان يكونوا 25M+)
+            'sizes' => ['nullable', 'array'],
+            'sizes.*' => ['string', 'max:20'],
+
+            'colors' => ['nullable', 'array'],
+            'colors.*.name' => ['required', 'string', 'max:50'],
+            'colors.*.hex' => ['required', 'string', 'max:20'],
+
             'main_image' => ['nullable', 'image', 'max:25600'],
             'additional_images' => ['nullable', 'array'],
             'additional_images.*' => ['image', 'max:25600'],

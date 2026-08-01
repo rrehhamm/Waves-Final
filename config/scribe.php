@@ -6,17 +6,12 @@ use Knuckles\Scribe\Extracting\Strategies;
 
 use function Knuckles\Scribe\Config\configureStrategy;
 
-// إعدادات Scribe - بيولّد توثيق تفاعلي (Interactive API Documentation) من الـ routes والـ Form Requests
-// والـ API Resources الموجودة بالمشروع تلقائياً. راجع https://scribe.knuckles.wtf/laravel/reference/config
-// للخيارات الكاملة - هون بس أهم الإعدادات اللي خصصناها لمشروع Waves.
 
 return [
-    // العنوان اللي بيظهر بتاب المتصفح (<title>). app.name = "Waves" (من .env)
     'title' => config('app.name').' API Documentation',
 
     'description' => 'REST API for the Waves e-commerce platform: a public/customer-facing storefront API and a separate Admin Dashboard API, both with full bilingual (Arabic/English) support.',
 
-    // النص اللي بيظهر بأول صفحة بالتوثيق، تحت الـ description مباشرة
     'intro_text' => <<<'INTRO'
             This documentation covers every endpoint in the Waves backend API.
 
@@ -38,7 +33,6 @@ return [
         ],
     ],
 
-    // 'laravel': التوثيق بيتولّد كـ Blade view مع route جاهز (بدل ملف HTML ثابت بـ public/docs)
     'type' => 'laravel',
 
     'theme' => 'default',
@@ -48,7 +42,6 @@ return [
     ],
 
     'laravel' => [
-        // بيسجل route تلقائياً لعرض التوثيق - بعد php artisan scribe:generate رح يكون متاح على /docs
         'add_routes' => true,
         'docs_url' => '/docs',
         'assets_directory' => null,
@@ -60,7 +53,6 @@ return [
     ],
 
     'try_it_out' => [
-        // زر "Try It Out" - بيخلي أي حدا يجرب الـ endpoint فعلياً من صفحة التوثيق نفسها
         'enabled' => true,
         'base_url' => null,
         'use_csrf' => false,
@@ -68,18 +60,13 @@ return [
     ],
 
     'auth' => [
-        // في endpoints بالمشروع محمية (Bearer token) - المشروع فيه auth
         'enabled' => true,
 
-        // مش كل الـ endpoints محمية افتراضياً (فيه Public API مفتوح بالكامل)
-        // كل controller/method محمي منحطله @authenticated بالـ docblock تحديداً
         'default' => false,
 
         'in' => AuthIn::BEARER->value,
         'name' => 'Authorization',
 
-        // توكن حقيقي (اختياري) لتجربة "Try It Out" و response calls تلقائياً وقت التوليد
-        // حطه بـ .env: SCRIBE_AUTH_KEY=<admin أو customer token حقيقي>
         'use_value' => env('SCRIBE_AUTH_KEY'),
 
         'placeholder' => '{YOUR_TOKEN}',
@@ -87,7 +74,6 @@ return [
         'extra_info' => 'Get an Admin token from `POST /api/admin/login`, or a Customer token from `POST /api/login` (or `POST /api/register`). Send it as `Authorization: Bearer {token}`. Admin tokens and Customer tokens are not interchangeable.',
     ],
 
-    // اللغات اللي بيتعرض فيها مثال الطلب (curl / JS / PHP) بكل endpoint
     'example_languages' => [
         'bash',
         'javascript',
@@ -109,7 +95,6 @@ return [
     'groups' => [
         'default' => 'Public - General',
 
-        // بنرتب المجموعات بالترتيب المنطقي اللي المستخدم غالباً بده يشوفه فيه
         'order' => [
             'Admin - Authentication',
             'Admin - Dashboard',
@@ -149,7 +134,6 @@ return [
             Strategies\StaticData::withSettings(data: [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-                // كل الـ endpoints بتحترم هاد الهيدر لتحديد اللغة (شوف SetLocale middleware)
                 'Accept-Language' => 'en',
             ]),
         ],

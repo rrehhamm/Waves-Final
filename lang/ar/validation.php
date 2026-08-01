@@ -1,7 +1,5 @@
 <?php
 
-// نفس ملف validation.php الإنجليزي، بس بالعربي
-// Laravel بيختار تلقائياً بينهم حسب App::setLocale() (شوف app/Http/Middleware/SetLocale.php)
 return [
 
     'required' => 'حقل :attribute مطلوب.',

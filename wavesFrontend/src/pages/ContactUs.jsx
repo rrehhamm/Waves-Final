@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { FiPhone, FiMail, FiMapPin, FiSend, FiCheckCircle } from 'react-icons/fi';
 
-// API Endpoint
 import { submitContactForm } from '../api/endpoints/contact';
+import { useLanguage } from '../context/LanguageContext';
+import { useSiteSettings } from '../context/SiteSettingsContext';
 
 const ContactUs = () => {
+    const { t } = useLanguage();
+    const { contactPhone, contactEmail, contactAddress } = useSiteSettings();
     const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '' });
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,14 +21,14 @@ const ContactUs = () => {
 
     const validate = () => {
         let errs = {};
-        if (!formData.name.trim()) errs.name = 'Full name is required';
-        if (!formData.phone.trim()) errs.phone = 'Phone number is required';
+        if (!formData.name.trim()) errs.name = t('contactPage.errors.name');
+        if (!formData.phone.trim()) errs.phone = t('contactPage.errors.phone');
         if (!formData.email.trim()) {
-            errs.email = 'Email address is required';
+            errs.email = t('contactPage.errors.emailRequired');
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            errs.email = 'Enter a valid email address';
+            errs.email = t('contactPage.errors.emailInvalid');
         }
-        if (!formData.message.trim()) errs.message = 'Message is required';
+        if (!formData.message.trim()) errs.message = t('contactPage.errors.message');
 
         setErrors(errs);
         return Object.keys(errs).length === 0;
@@ -44,34 +47,32 @@ const ContactUs = () => {
             setTimeout(() => setSubmitted(false), 5000);
         } catch (err) {
             setIsSubmitting(false);
-            alert(err.response?.data?.message || err.message || 'Failed to submit message.');
+            alert(err.response?.data?.message || err.message || t('contactPage.submitError'));
         }
     };
 
     return (
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-sans text-gray-900">
-            <nav className="text-xs text-gray-500 mb-4"><span>Contact</span></nav>
+            <nav className="text-xs text-gray-500 mb-4"><span>{t('nav.contact')}</span></nav>
 
             <div className="mb-10">
-                <h1 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight mb-2">Contact Us</h1>
+                <h1 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight mb-2">{t('contactPage.title')}</h1>
                 <p className="text-sm text-gray-500 max-w-xl">
-                    Have a question or need assistance with your order? Reach out to our support team.
+                    {t('contactPage.subtitle')}
                 </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-16">
-                {/* Information Side */}
                 <div className="lg:col-span-5 bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-6">
-                    <h2 className="text-xl font-bold text-black border-b border-gray-200 pb-4">Get In Touch</h2>
+                    <h2 className="text-xl font-bold text-black border-b border-gray-200 pb-4">{t('contactPage.getInTouch')}</h2>
 
                     <div className="flex items-start gap-4">
                         <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center flex-shrink-0">
                             <FiPhone className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="text-xs text-gray-400 font-semibold uppercase">Phone</h3>
-                            {/* Placeholder contact info - swap for Reham's real number once confirmed */}
-                            <p className="text-sm font-semibold text-black mt-0.5">+962 79 000 0000</p>
+                            <h3 className="text-xs text-gray-400 font-semibold uppercase">{t('contactPage.phone')}</h3>
+                            <p className="text-sm font-semibold text-black mt-0.5">{contactPhone}</p>
                         </div>
                     </div>
 
@@ -80,9 +81,8 @@ const ContactUs = () => {
                             <FiMail className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="text-xs text-gray-400 font-semibold uppercase">Email</h3>
-                            {/* Placeholder contact info - swap for Reham's real email once confirmed */}
-                            <p className="text-sm font-semibold text-black mt-0.5">reham@waves-test.com</p>
+                            <h3 className="text-xs text-gray-400 font-semibold uppercase">{t('contactPage.email')}</h3>
+                            <p className="text-sm font-semibold text-black mt-0.5">{contactEmail}</p>
                         </div>
                     </div>
 
@@ -91,27 +91,26 @@ const ContactUs = () => {
                             <FiMapPin className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="text-xs text-gray-400 font-semibold uppercase">Location</h3>
-                            <p className="text-sm font-semibold text-black mt-0.5">Amman, Jordan</p>
+                            <h3 className="text-xs text-gray-400 font-semibold uppercase">{t('contactPage.location')}</h3>
+                            <p className="text-sm font-semibold text-black mt-0.5">{contactAddress}</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Contact Form */}
                 <div className="lg:col-span-7 border border-gray-200 rounded-2xl p-6 sm:p-8 bg-white">
-                    <h2 className="text-2xl font-bold text-black mb-6">Send Us a Message</h2>
+                    <h2 className="text-2xl font-bold text-black mb-6">{t('contactPage.sendMessage')}</h2>
 
                     {submitted && (
                         <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 text-emerald-800 text-sm">
                             <FiCheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                            <span>Thank you! Your message has been sent successfully.</span>
+                            <span>{t('contactPage.submitSuccess')}</span>
                         </div>
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase">Full Name *</label>
+                                <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase">{t('contactPage.fullName')}</label>
                                 <input
                                     type="text"
                                     name="name"
@@ -123,7 +122,7 @@ const ContactUs = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase">Phone Number *</label>
+                                <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase">{t('contactPage.phoneNumber')}</label>
                                 <input
                                     type="text"
                                     name="phone"
@@ -136,7 +135,7 @@ const ContactUs = () => {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase">Email Address *</label>
+                            <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase">{t('contactPage.emailAddress')}</label>
                             <input
                                 type="text"
                                 name="email"
@@ -148,7 +147,7 @@ const ContactUs = () => {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase">Message *</label>
+                            <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase">{t('contactPage.messageLabel')}</label>
                             <textarea
                                 name="message"
                                 rows={5}
@@ -164,7 +163,7 @@ const ContactUs = () => {
                             disabled={isSubmitting}
                             className="bg-black text-white text-xs font-semibold px-8 py-4 rounded-full hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-md disabled:opacity-50 cursor-pointer"
                         >
-                            <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
+                            <span>{isSubmitting ? t('contactPage.sending') : t('contactPage.sendButton')}</span>
                             <FiSend className="w-3.5 h-3.5" />
                         </button>
                     </form>

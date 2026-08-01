@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('email');
             $table->text('message');
 
-            // is_read: الأدمن بيقدر "Mark as read" بعد ما يفتح الرسالة
             $table->boolean('is_read')->default(false);
 
             $table->timestamps();

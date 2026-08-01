@@ -21,7 +21,6 @@ class StoreBannerRequest extends FormRequest
             'tag' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'image' => ['required', 'image', 'max:25600'],
-            'link' => ['nullable', 'url', 'max:255'], // url: لازم يكون رابط صحيح الصيغة (https://...)
             'status' => ['nullable', 'boolean'],
         ];
     }

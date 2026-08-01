@@ -1,7 +1,5 @@
 <?php
 
-// ملف رسائل أخطاء الـ validation بالإنجليزي
-// لو حقل فشل بأي rule (required, email, max...)، Laravel بيدور هون على الرسالة المناسبة
 return [
 
     'required' => 'The :attribute field is required.',
@@ -33,12 +31,6 @@ return [
         'array' => 'The :attribute field must have at least :min items.',
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Custom Validation Attributes
-    |--------------------------------------------------------------------------
-    | أسماء الحقول اللي بتظهر جوا الرسالة بدل الاسم التقني (مثلاً name_ar -> "Arabic Name")
-    */
     'attributes' => [
         'name_ar' => 'Arabic name',
         'name_en' => 'English name',

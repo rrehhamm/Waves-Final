@@ -22,23 +22,22 @@ class StoreProductRequest extends FormRequest
             'description_ar' => ['nullable', 'string'],
             'description_en' => ['nullable', 'string'],
 
-            'price' => ['required', 'numeric', 'min:0'],       // numeric بيقبل أرقام عشرية (12.5)
+            'price' => ['required', 'numeric', 'min:0'],
             'discount_percent' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'quantity' => ['required', 'integer', 'min:0'],     // integer بس (مش عشري)
+            'quantity' => ['required', 'integer', 'min:0'],
 
-            // max:25600 = 25 ميجا (صور موبايل بجودة عالية ممكن توصل لهاد الحجم)
-            // ملاحظة مهمة: لازم upload_max_filesize و post_max_size بملف php.ini يكونوا 25M أو أكتر
-            // كمان، وإلا PHP نفسه بيرفض الملف قبل حتى ما يوصل لفحص Laravel (بيطلع خطأ "must be an image"
-            // بسبب هيك برضه، مش بس بسبب النوع)
-            'main_image' => ['required', 'image', 'max:25600'],  // إجباري وقت الإنشاء
+            'sizes' => ['nullable', 'array'],
+            'sizes.*' => ['string', 'max:20'],
 
-            // additional_images: مصفوفة صور (اختيارية)
-            // additional_images.* : كل عنصر جوا المصفوفة لازم يكون صورة
+            'colors' => ['nullable', 'array'],
+            'colors.*.name' => ['required', 'string', 'max:50'],
+            'colors.*.hex' => ['required', 'string', 'max:20'],
+
+            'main_image' => ['required', 'image', 'max:25600'],
+
             'additional_images' => ['nullable', 'array'],
             'additional_images.*' => ['image', 'max:25600'],
 
-            // exists:categories,id => لازم الرقم المرسل يكون فعلاً موجود بجدول categories عمود id
-            // (بيمنع مثلاً إرسال category_id = 9999 مش موجود أصلاً)
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'brand_id' => ['required', 'integer', 'exists:brands,id'],
 

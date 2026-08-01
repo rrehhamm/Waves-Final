@@ -16,14 +16,10 @@ class Brand extends Model
     {
         return [
             'status' => 'boolean',
-            // featured: الأدمن بيحددها يدوياً - هاي البراندات يلي بتظهر بقسم "Featured Brands" بالصفحة الرئيسية
             'featured' => 'boolean',
         ];
     }
 
-    /**
-     * علاقة: البراند الواحد عنده منتجات كتير
-     */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('brands', function (Blueprint $table) {
             $table->id();
-            $table->string('name');               // اسم البراند (المواصفات ما طلبت name_ar/name_en لهاد الجدول)
-            $table->string('logo')->nullable();     // مسار صورة اللوجو
+            $table->string('name');
+            $table->string('logo')->nullable();
             $table->text('description')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();

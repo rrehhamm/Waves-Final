@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import adminApi from '../api/adminApi';
 import Modal from '../components/Modal';
-import { Pencil, Trash2, Plus, ToggleLeft, ToggleRight, ArrowUp, ArrowDown } from 'lucide-react';
+import { Pencil, Trash2, Plus, ToggleLeft, ToggleRight, ArrowUp, ArrowDown, GalleryHorizontal, ImageOff } from 'lucide-react';
+import { Card, PageHeader, Button, IconButton, Badge, Input, Textarea, Toggle, EmptyState, TableSkeletonRow, FormError } from '../components/ui';
+import { useLanguage } from '../../context/LanguageContext';
 
 const emptyForm = { title: '', description: '', status: true, image: null };
 
 export default function GalleryAdmin() {
+    const { t } = useLanguage();
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -22,7 +25,7 @@ export default function GalleryAdmin() {
         adminApi
             .get('/gallery')
             .then((res) => setImages((res.data?.data || []).slice().sort((a, b) => a.sort_order - b.sort_order)))
-            .catch(() => setError('Failed to load gallery.'))
+            .catch(() => setError(t('admin.gallery.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -59,7 +62,6 @@ export default function GalleryAdmin() {
                 fd.append('_method', 'PUT');
                 await adminApi.post(`/gallery/${editing.id}`, fd);
             } else {
-                // New images are appended to the end of the current order
                 fd.append('sort_order', String(images.length));
                 await adminApi.post('/gallery', fd);
             }
@@ -67,19 +69,19 @@ export default function GalleryAdmin() {
             load();
         } catch (err) {
             const errors = err.response?.data?.errors;
-            setFormError(errors ? Object.values(errors).flat().join(' ') : 'Something went wrong. Please try again.');
+            setFormError(errors ? Object.values(errors).flat().join(' ') : t('admin.common.somethingWrong'));
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (img) => {
-        if (!window.confirm('Delete this gallery image?')) return;
+        if (!window.confirm(t('admin.gallery.deleteConfirm'))) return;
         try {
             await adminApi.delete(`/gallery/${img.id}`);
             load();
         } catch {
-            alert('Failed to delete image.');
+            alert(t('admin.gallery.failedDelete'));
         }
     };
 
@@ -88,7 +90,7 @@ export default function GalleryAdmin() {
             await adminApi.patch(`/gallery/${img.id}/toggle-status`);
             load();
         } catch {
-            alert('Failed to toggle image visibility.');
+            alert(t('admin.gallery.failedToggle'));
         }
     };
 
@@ -106,132 +108,102 @@ export default function GalleryAdmin() {
             });
             load();
         } catch {
-            alert('Failed to save new order.');
+            alert(t('admin.gallery.failedReorder'));
             load();
         }
     };
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold">Gallery</h1>
-                <button
-                    onClick={openCreate}
-                    type="button"
-                    className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800"
-                >
-                    <Plus size={16} /> Add Image
-                </button>
-            </div>
+            <PageHeader
+                title={t('admin.gallery.title')}
+                subtitle={t('admin.gallery.subtitle')}
+                actions={
+                    <Button onClick={openCreate} icon={Plus}>
+                        {t('admin.gallery.addImage')}
+                    </Button>
+                }
+            />
 
-            {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
+            {error && <div className="mb-4"><FormError message={error} /></div>}
 
-            <div className="bg-white rounded-xl border overflow-x-auto">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-500 text-left">
-                        <tr>
-                            <th className="px-4 py-3">Order</th>
-                            <th className="px-4 py-3">Image</th>
-                            <th className="px-4 py-3">Title</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {loading ? (
+            <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="text-left border-b border-slate-100">
                             <tr>
-                                <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
-                                    Loading...
-                                </td>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.gallery.order')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.gallery.image')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.gallery.titleField')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.status')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('admin.common.actions')}</th>
                             </tr>
-                        ) : images.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
-                                    No gallery images yet.
-                                </td>
-                            </tr>
-                        ) : (
-                            images.map((img, index) => (
-                                <tr key={img.id}>
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                disabled={index === 0}
-                                                onClick={() => move(index, -1)}
-                                                type="button"
-                                                className="text-gray-400 hover:text-gray-800 disabled:opacity-30"
-                                            >
-                                                <ArrowUp size={14} />
-                                            </button>
-                                            <button
-                                                disabled={index === images.length - 1}
-                                                onClick={() => move(index, 1)}
-                                                type="button"
-                                                className="text-gray-400 hover:text-gray-800 disabled:opacity-30"
-                                            >
-                                                <ArrowDown size={14} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {img.image ? (
-                                            <img src={img.image} alt={img.title} className="w-10 h-10 rounded object-cover" />
-                                        ) : (
-                                            <div className="w-10 h-10 rounded bg-gray-100" />
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3 font-medium">{img.title || '—'}</td>
-                                    <td className="px-4 py-3">
-                                        <span
-                                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                img.status ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                                            }`}
-                                        >
-                                            {img.status ? 'Visible' : 'Hidden'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-right space-x-3">
-                                        <button onClick={() => handleToggle(img)} type="button" className="text-gray-500 hover:text-gray-900" title="Show/Hide">
-                                            {img.status ? <ToggleRight size={18} className="text-green-600" /> : <ToggleLeft size={18} />}
-                                        </button>
-                                        <button onClick={() => openEdit(img)} type="button" className="text-gray-500 hover:text-gray-900" title="Edit">
-                                            <Pencil size={16} />
-                                        </button>
-                                        <button onClick={() => handleDelete(img)} type="button" className="text-red-500 hover:text-red-700" title="Delete">
-                                            <Trash2 size={16} />
-                                        </button>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {loading ? (
+                                <TableSkeletonRow cols={5} />
+                            ) : images.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5}>
+                                        <EmptyState icon={GalleryHorizontal} title={t('admin.gallery.noImages')} subtitle={t('admin.gallery.addFirst')} />
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            ) : (
+                                images.map((img, index) => (
+                                    <tr key={img.id} className="hover:bg-slate-50/70 transition-colors">
+                                        <td className="px-6 py-3">
+                                            <div className="flex items-center gap-1">
+                                                <IconButton icon={ArrowUp} disabled={index === 0} onClick={() => move(index, -1)} className="disabled:opacity-30" />
+                                                <IconButton icon={ArrowDown} disabled={index === images.length - 1} onClick={() => move(index, 1)} className="disabled:opacity-30" />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-3">
+                                            {img.image ? (
+                                                <img src={img.image} alt={img.title} className="w-10 h-10 rounded-lg object-cover" />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300">
+                                                    <ImageOff size={15} />
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-3 font-semibold text-slate-800">{img.title || '—'}</td>
+                                        <td className="px-6 py-3">
+                                            <Badge tone={img.status ? 'emerald' : 'slate'}>{img.status ? t('admin.gallery.statusVisible') : t('admin.gallery.statusHidden')}</Badge>
+                                        </td>
+                                        <td className="px-6 py-3 text-right">
+                                            <div className="flex items-center justify-end gap-1.5">
+                                                <IconButton
+                                                    icon={img.status ? ToggleRight : ToggleLeft}
+                                                    tone={img.status ? 'success' : 'default'}
+                                                    onClick={() => handleToggle(img)}
+                                                    title={t('admin.gallery.showHide')}
+                                                />
+                                                <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(img)} title={t('admin.common.edit')} />
+                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(img)} title={t('admin.common.delete')} />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit Image' : 'Add Image'}>
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('admin.gallery.editImage') : t('admin.gallery.addImage')}>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {formError && <p className="text-red-600 text-sm">{formError}</p>}
+                    <FormError message={formError} />
 
+                    <Input label={t('admin.gallery.titleField')} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+                    <Textarea
+                        label={t('admin.gallery.description')}
+                        value={form.description}
+                        onChange={(e) => setForm({ ...form, description: e.target.value })}
+                        rows={2}
+                    />
                     <div>
-                        <label className="block text-sm font-medium mb-1">Title</label>
-                        <input
-                            value={form.title}
-                            onChange={(e) => setForm({ ...form, title: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Description</label>
-                        <textarea
-                            value={form.description}
-                            onChange={(e) => setForm({ ...form, description: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm"
-                            rows={2}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Image {editing ? '(leave empty to keep current)' : ''}
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                            {t('admin.gallery.image')} {editing ? t('admin.common.keepCurrentImage') : ''}
                         </label>
                         <input
                             type="file"
@@ -242,29 +214,18 @@ export default function GalleryAdmin() {
                                 setForm({ ...form, image: file });
                                 if (file) setPreview(URL.createObjectURL(file));
                             }}
-                            className="w-full text-sm"
+                            className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 file:text-xs file:font-semibold hover:file:bg-slate-200 file:cursor-pointer cursor-pointer"
                         />
-                        {preview && <img src={preview} alt="preview" className="mt-2 w-16 h-16 rounded object-cover" />}
+                        {preview && <img src={preview} alt="preview" className="mt-2.5 w-16 h-16 rounded-lg object-cover border border-slate-200" />}
                     </div>
-                    <label className="flex items-center gap-2 text-sm">
-                        <input type="checkbox" checked={form.status} onChange={(e) => setForm({ ...form, status: e.target.checked })} />
-                        Visible
-                    </label>
-                    <div className="flex justify-end gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={() => setModalOpen(false)}
-                            className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50"
-                        >
-                            {saving ? 'Saving...' : 'Save'}
-                        </button>
+                    <Toggle label={t('admin.gallery.visible')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+                    <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                        <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
+                            {t('admin.common.cancel')}
+                        </Button>
+                        <Button type="submit" disabled={saving}>
+                            {saving ? t('admin.common.saving') : t('admin.gallery.saveImage')}
+                        </Button>
                     </div>
                 </form>
             </Modal>

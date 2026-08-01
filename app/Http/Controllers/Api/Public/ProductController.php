@@ -7,18 +7,8 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
-/**
- * @group Public - Products
- *
- * Open endpoints, no login required.
- */
 class ProductController extends Controller
 {
-    /**
-     * List active products
-     *
-     * GET /api/products
-     */
     public function index()
     {
         $products = Product::where('status', true)
@@ -29,11 +19,6 @@ class ProductController extends Controller
         return ProductResource::collection($products);
     }
 
-    /**
-     * Get a product
-     *
-     * GET /api/products/{id}
-     */
     public function show(int $id)
     {
         $product = Product::where('status', true)
@@ -43,42 +28,61 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
-    /**
-     * Search / filter products
-     *
-     * GET /api/products/search?search=...&category=...&brand=...&min_price=...&max_price=...
-     * (متطلب رقم 10: GET /products/search filters: category, brand, price)
-     */
     public function search(Request $request)
     {
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'category' => ['nullable', 'integer'],
+            'brand' => ['nullable', 'integer'],
+            'min_price' => ['nullable', 'numeric', 'min:0'],
+            'max_price' => ['nullable', 'numeric', 'min:0'],
+            'sort' => ['nullable', 'string', 'in:latest,price_low,price_high'],
+        ]);
+
         $query = Product::where('status', true)->with(['category', 'brand']);
 
-        // filled(): بيتحقق إن القيمة موجودة ومش فاضية (أدق من has())
-        if ($request->filled('search')) {
-            $search = $request->query('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name_ar', 'like', "%{$search}%")
-                    ->orWhere('name_en', 'like', "%{$search}%");
+        $search = trim((string) ($validated['search'] ?? ''));
+
+        if ($search !== '') {
+            $term = '%'.$search.'%';
+            $query->where(function ($q) use ($term) {
+                $q->where('name_ar', 'like', $term)
+                    ->orWhere('name_en', 'like', $term)
+                    ->orWhere('description_ar', 'like', $term)
+                    ->orWhere('description_en', 'like', $term)
+                    ->orWhereHas('brand', function ($b) use ($term) {
+                        $b->where('name', 'like', $term);
+                    })
+                    ->orWhereHas('category', function ($c) use ($term) {
+                        $c->where('name_ar', 'like', $term)
+                            ->orWhere('name_en', 'like', $term);
+                    });
             });
         }
 
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->query('category'));
+        if (! empty($validated['category'])) {
+            $query->where('category_id', $validated['category']);
         }
 
-        if ($request->filled('brand')) {
-            $query->where('brand_id', $request->query('brand'));
+        if (! empty($validated['brand'])) {
+            $query->where('brand_id', $validated['brand']);
         }
 
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->query('min_price'));
+        if (isset($validated['min_price'])) {
+            $query->where('price', '>=', $validated['min_price']);
         }
 
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->query('max_price'));
+        if (isset($validated['max_price'])) {
+            $query->where('price', '<=', $validated['max_price']);
         }
 
-        $products = $query->latest()->paginate(15);
+        match ($validated['sort'] ?? 'latest') {
+            'price_low' => $query->orderBy('price', 'asc'),
+            'price_high' => $query->orderBy('price', 'desc'),
+            default => $query->latest(),
+        };
+
+        $products = $query->paginate(15)->withQueryString();
 
         return ProductResource::collection($products);
     }

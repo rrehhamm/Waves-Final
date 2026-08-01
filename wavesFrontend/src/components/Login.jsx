@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { useAuth } from '../context/AuthContext'; // 1. Import Auth Hook
+import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const Login = ({ onSuccess }) => {
+    const { t } = useLanguage();
     const navigate = useNavigate();
-    const { login } = useAuth(); // 2. Extract login function
+    const { login } = useAuth();
+    const [searchParams] = useSearchParams();
 
     const [formData, setFormData] = useState({
         email: '',
@@ -16,7 +19,7 @@ const Login = ({ onSuccess }) => {
 
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState(() => (searchParams.get('expired') === '1' ? t('auth.sessionExpired') : ''));
     const [isSuccess, setIsSuccess] = useState(false);
 
     const handleChange = (e) => {
@@ -31,7 +34,7 @@ const Login = ({ onSuccess }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.email || !formData.password) {
-            setError('Please fill in all fields.');
+            setError(t('auth.errors.requiredFields'));
             return;
         }
 
@@ -39,9 +42,6 @@ const Login = ({ onSuccess }) => {
         setError('');
 
         try {
-            // 3. Call backend endpoint via Auth Context - rememberMe decides whether the
-            // token persists in localStorage (survives browser restarts) or sessionStorage
-            // (cleared when the tab/browser closes)
             await login(formData.email, formData.password, formData.rememberMe);
 
             setIsSuccess(true);
@@ -52,7 +52,7 @@ const Login = ({ onSuccess }) => {
             }, 800);
         } catch (err) {
             console.error('Login error:', err);
-            setError(err.response?.data?.message || 'Invalid email or password.');
+            setError(err.response?.data?.message || t('auth.errors.invalidCredentials'));
         } finally {
             setIsLoading(false);
         }
@@ -66,13 +66,12 @@ const Login = ({ onSuccess }) => {
                 transition={{ duration: 0.4, ease: 'easeOut' }}
                 className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-3xl p-8 sm:p-10 shadow-xl shadow-gray-200/50 border border-gray-100/80"
             >
-                {/* Header */}
                 <div className="text-center space-y-2 mb-8">
                     <h1 className="text-3xl font-black tracking-tight uppercase text-black">
-                        Welcome Back
+                        {t('auth.welcomeBack')}
                     </h1>
                     <p className="text-sm text-gray-500 font-medium">
-                        Sign in to access your account & orders
+                        {t('auth.welcomeBackSubtitle')}
                     </p>
                 </div>
 
@@ -94,15 +93,14 @@ const Login = ({ onSuccess }) => {
                         className="mb-6 p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/60 flex items-center gap-3 text-emerald-600 text-xs font-semibold"
                     >
                         <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                        <span>Sign in successful! Redirecting...</span>
+                        <span>{t('auth.loginSuccess')}</span>
                     </motion.div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Email */}
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold tracking-wider uppercase text-gray-700">
-                            Email Address
+                            {t('auth.emailAddress')}
                         </label>
                         <div className="relative flex items-center">
                             <Mail className="absolute left-4 w-4 h-4 text-gray-400" />
@@ -118,14 +116,13 @@ const Login = ({ onSuccess }) => {
                         </div>
                     </div>
 
-                    {/* Password */}
                     <div className="space-y-1.5">
                         <div className="flex justify-between items-center">
                             <label className="text-xs font-bold tracking-wider uppercase text-gray-700">
-                                Password
+                                {t('auth.password')}
                             </label>
                             <a href="#forgot" className="text-xs text-gray-500 hover:text-black font-semibold transition-colors">
-                                Forgot password?
+                                {t('auth.forgotPassword')}
                             </a>
                         </div>
                         <div className="relative flex items-center">
@@ -149,7 +146,6 @@ const Login = ({ onSuccess }) => {
                         </div>
                     </div>
 
-                    {/* Remember me */}
                     <div className="flex items-center gap-2.5 pt-1">
                         <input
                             type="checkbox"
@@ -160,11 +156,10 @@ const Login = ({ onSuccess }) => {
                             className="w-4 h-4 rounded-md border-gray-300 text-black focus:ring-0 focus:ring-offset-0 cursor-pointer accent-black"
                         />
                         <label htmlFor="rememberMe" className="text-xs text-gray-600 font-medium cursor-pointer select-none">
-                            Remember me on this device
+                            {t('auth.rememberMe')}
                         </label>
                     </div>
 
-                    {/* Submit Button */}
                     <button
                         type="submit"
                         disabled={isLoading}
@@ -173,21 +168,20 @@ const Login = ({ onSuccess }) => {
                         {isLoading ? (
                             <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
-                            'Sign In'
+                            t('auth.signIn')
                         )}
                     </button>
                 </form>
 
-                {/* Footer Switch */}
                 <div className="mt-8 pt-6 border-t border-gray-100 text-center">
                     <p className="text-xs text-gray-500 font-medium">
-                        Don't have an account?{' '}
+                        {t('auth.dontHaveAccount')}{' '}
                         <button
                             type="button"
                             onClick={() => navigate('/signup')}
                             className="font-bold text-black hover:underline ml-1 uppercase tracking-wider"
                         >
-                            Sign Up
+                            {t('auth.signUp')}
                         </button>
                     </p>
                 </div>

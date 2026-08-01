@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 import ProductCard from '../components/ProductCard';
 import LoadingComponent from '../components/LoadingComponent';
 import EmptyStateComponent from '../components/EmptyStateComponent';
 import { fetchProductById, fetchRelatedProducts } from '../api/endpoints/products';
+import { formatCurrency } from '../utils/currency';
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import { ShoppingBag, Tag, ShieldCheck, Box } from 'lucide-react';
 
 const ProductDetails = () => {
     const { id } = useParams();
     const { addToCart } = useCart();
+    const { t } = useLanguage();
 
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
@@ -18,30 +21,35 @@ const ProductDetails = () => {
     const [error, setError] = useState(null);
 
     const [selectedImg, setSelectedImg] = useState('');
-    const [selectedSize, setSelectedSize] = useState(42);
+    const [selectedSize, setSelectedSize] = useState(null);
+    const [selectedColor, setSelectedColor] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         const loadProductDetails = async () => {
             setLoading(true);
             setError(null);
-            setQuantity(1); // Reset quantity on ID change
+            setQuantity(1);
 
             try {
                 const data = await fetchProductById(id);
                 setProduct(data);
 
-                // Set main image or fallback image array
                 const mainImg = data.main_image || data.image_url || (data.images && data.images[0]) || '';
                 setSelectedImg(mainImg);
 
-                // Fetch related items by category ID
+                const sizes = Array.isArray(data.sizes) ? data.sizes : [];
+                setSelectedSize(sizes.length > 0 ? sizes[0] : null);
+
+                const colors = Array.isArray(data.colors) ? data.colors : [];
+                setSelectedColor(colors.length > 0 ? colors[0].name : null);
+
                 const categoryId = data.category_id || data.category?.id;
                 const related = await fetchRelatedProducts(categoryId, id);
                 setRelatedProducts(related);
             } catch (err) {
                 console.error('Error loading product details:', err);
-                setError('Failed to fetch product details.');
+                setError(t('productDetails.fetchError'));
             } finally {
                 setLoading(false);
             }
@@ -53,9 +61,8 @@ const ProductDetails = () => {
     }, [id]);
 
     if (loading) return <LoadingComponent />;
-    if (error || !product) return <EmptyStateComponent message={error || 'Product not found.'} />;
+    if (error || !product) return <EmptyStateComponent message={error || t('productDetails.notFound')} />;
 
-    // Construct array of all images
     const additionalImgs = Array.isArray(product.additional_images)
         ? product.additional_images
         : Array.isArray(product.images)
@@ -66,10 +73,8 @@ const ProductDetails = () => {
 
     return (
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans text-gray-900">
-            {/* Product Gallery & Action Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-16 items-start">
 
-                {/* Gallery Thumbnails */}
                 {allImages.length > 0 && (
                     <div className="lg:col-span-2 flex lg:flex-col gap-3 order-2 lg:order-1 justify-center lg:justify-start">
                         {allImages.map((img, idx) => (
@@ -85,7 +90,6 @@ const ProductDetails = () => {
                     </div>
                 )}
 
-                {/* Main Image Display */}
                 <div className={`${allImages.length > 0 ? 'lg:col-span-5' : 'lg:col-span-7'} bg-gradient-to-b from-gray-50 to-gray-100/60 rounded-3xl p-8 flex items-center justify-center order-1 lg:order-2 aspect-square border border-gray-100/80 shadow-inner`}>
                     <img
                         src={selectedImg || product.main_image || product.image_url}
@@ -94,25 +98,23 @@ const ProductDetails = () => {
                     />
                 </div>
 
-                {/* Product Details & Actions */}
                 <div className="lg:col-span-5 flex flex-col justify-between order-3 space-y-6">
                     <div className="space-y-4">
                         <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black leading-tight">
                             {product.name_en || product.name}
                         </h1>
 
-                        {/* Shows the admin-set discounted final_price when discount_percent applies */}
                         <div className="flex items-baseline gap-2 pt-2">
                             {product.discount_percent && product.final_price != null && Number(product.final_price) < Number(product.price) ? (
                                 <>
-                                    <span className="text-3xl font-black tracking-tight text-black">JD {product.final_price}</span>
-                                    <span className="text-lg font-semibold text-gray-400 line-through">JD {product.price}</span>
+                                    <span className="text-3xl font-black tracking-tight text-black">{formatCurrency(product.final_price)}</span>
+                                    <span className="text-lg font-semibold text-gray-400 line-through">{formatCurrency(product.price)}</span>
                                     <span className="bg-[#81A6C6] text-white text-xs font-extrabold px-2.5 py-1 rounded-full">
                                         -{product.discount_percent}%
                                     </span>
                                 </>
                             ) : (
-                                <span className="text-3xl font-black tracking-tight text-black">JD {product.price}</span>
+                                <span className="text-3xl font-black tracking-tight text-black">{formatCurrency(product.price)}</span>
                             )}
                         </div>
 
@@ -120,29 +122,55 @@ const ProductDetails = () => {
                             {product.description_en || product.description || 'No description available for this product.'}
                         </p>
 
-                        {/* Size Selection */}
-                        <div className="space-y-3 pt-2">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block">
-                                Choose Size
-                            </span>
-                            <div className="flex flex-wrap gap-2.5">
-                                {[36, 37, 40, 42, 43].map((size) => (
-                                    <button
-                                        key={size}
-                                        onClick={() => setSelectedSize(size)}
-                                        className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 ${selectedSize === size
-                                                ? 'bg-black text-white shadow-md shadow-black/10 scale-105'
-                                                : 'bg-gray-100/80 text-gray-600 hover:bg-gray-200/80'
-                                            }`}
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
+                        {Array.isArray(product.sizes) && product.sizes.length > 0 && (
+                            <div className="space-y-3 pt-2">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block">
+                                    {t('productDetails.chooseSize')}
+                                </span>
+                                <div className="flex flex-wrap gap-2.5">
+                                    {product.sizes.map((size) => (
+                                        <button
+                                            key={size}
+                                            onClick={() => setSelectedSize(size)}
+                                            className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 ${selectedSize === size
+                                                    ? 'bg-black text-white shadow-md shadow-black/10 scale-105'
+                                                    : 'bg-gray-100/80 text-gray-600 hover:bg-gray-200/80'
+                                                }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
+
+                        {Array.isArray(product.colors) && product.colors.length > 0 && (
+                            <div className="space-y-3 pt-2">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block">
+                                    {t('productDetails.chooseColor')}
+                                </span>
+                                <div className="flex flex-wrap gap-2.5">
+                                    {product.colors.map((color) => (
+                                        <button
+                                            key={color.name}
+                                            onClick={() => setSelectedColor(color.name)}
+                                            title={color.name}
+                                            className={`w-9 h-9 rounded-full border-2 transition-all duration-200 flex items-center justify-center ${selectedColor === color.name
+                                                    ? 'border-black scale-110 shadow-md shadow-black/10'
+                                                    : 'border-gray-200 hover:border-gray-400'
+                                                }`}
+                                        >
+                                            <span
+                                                className="w-6 h-6 rounded-full border border-black/10"
+                                                style={{ backgroundColor: color.hex }}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Quantity & Add to Cart Controls */}
                     <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
                         <div className="flex items-center justify-between bg-gray-100/80 rounded-2xl px-4 py-3 w-32 border border-gray-200/50">
                             <button
@@ -161,64 +189,62 @@ const ProductDetails = () => {
                         </div>
 
                         <button
-                            onClick={() => addToCart({ ...product, quantity, selectedSize })}
+                            onClick={() => addToCart({ ...product, quantity, selectedSize, selectedColor })}
                             className="flex-1 bg-black hover:bg-zinc-800 active:scale-[0.99] text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-black/10 text-xs uppercase tracking-wider flex items-center justify-center gap-2"
                         >
                             <ShoppingBag className="w-4 h-4" />
-                            Add to Cart
+                            {t('common.addToCart')}
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* Product Specifications / Meta Info */}
             <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm mb-16">
                 <h3 className="text-base font-extrabold mb-5 text-black border-b border-gray-100 pb-3 flex items-center justify-between">
-                    <span>تفاصيل المنتج (Product Details)</span>
+                    <span>{t('productDetails.title')}</span>
                     <ShieldCheck className="w-5 h-5 text-gray-400" />
                 </h3>
                 <ul className="space-y-4 text-sm">
                     <li className="flex justify-between items-center border-b border-gray-50 pb-3">
                         <span className="font-medium text-gray-500 flex items-center gap-2">
                             <Tag className="w-4 h-4 text-gray-400" />
-                            التصنيف:
+                            {t('productDetails.category')}
                         </span>
                         <span className="font-bold text-gray-900">
-                            {product.category?.name_ar || product.category?.name_en || product.category?.name || 'غير محدد'}
+                            {product.category?.name || t('productDetails.notSpecified')}
                         </span>
                     </li>
                     <li className="flex justify-between items-center border-b border-gray-50 pb-3">
                         <span className="font-medium text-gray-500 flex items-center gap-2">
                             <Box className="w-4 h-4 text-gray-400" />
-                            البراند:
+                            {t('productDetails.brand')}
                         </span>
                         <span className="font-bold text-gray-900">
-                            {product.brand?.name || 'غير محدد'}
+                            {product.brand?.name || t('productDetails.notSpecified')}
                         </span>
                     </li>
                     <li className="flex justify-between items-center">
-                        <span className="font-medium text-gray-500">حالة توفر المنتج:</span>
+                        <span className="font-medium text-gray-500">{t('productDetails.stockStatus')}</span>
                         <span
                             className={`px-3 py-1 rounded-full text-xs font-bold ${(product.stock || product.quantity || 0) > 0
                                     ? 'bg-emerald-50 text-emerald-600 border border-emerald-200/60'
                                     : 'bg-red-50 text-red-600 border border-red-200/60'
                                 }`}
                         >
-                            {(product.stock || product.quantity || 0) > 0 ? 'متوفر بالمخزن (In Stock)' : 'غير متوفر (Out of Stock)'}
+                            {(product.stock || product.quantity || 0) > 0 ? t('productDetails.inStock') : t('productDetails.outOfStock')}
                         </span>
                     </li>
                 </ul>
             </div>
 
-            {/* Related Products Section */}
             {relatedProducts.length > 0 && (
                 <section className="pt-12 border-t border-gray-100">
                     <div className="text-center mb-10 space-y-1">
                         <h2 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
-                            You Might Also Like
+                            {t('productDetails.relatedTitle')}
                         </h2>
                         <p className="text-xs text-gray-400 font-medium tracking-wide uppercase">
-                            Explore related items from our collection
+                            {t('productDetails.relatedSubtitle')}
                         </p>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">

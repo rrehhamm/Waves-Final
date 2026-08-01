@@ -19,7 +19,6 @@ class UpdateCategoryRequest extends FormRequest
         return [
             'name_ar' => ['required', 'string', 'max:255'],
             'name_en' => ['required', 'string', 'max:255'],
-            // بالتحديث الصورة اختيارية دايماً - إذا ما انبعتت، بيضل يستخدم القديمة (منطق الـ Controller)
             'image' => ['nullable', 'image', 'max:25600'],
             'description' => ['nullable', 'string'],
             'status' => ['nullable', 'boolean'],

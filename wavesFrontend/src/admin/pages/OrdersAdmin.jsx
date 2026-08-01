@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import adminApi from '../api/adminApi';
 import Modal from '../components/Modal';
-import { Eye } from 'lucide-react';
+import ProductCard from '../../components/ProductCard';
+import { Eye, Trash2, RotateCcw, XCircle, ShoppingCart, Trash } from 'lucide-react';
+import { Card, PageHeader, IconButton, Badge, Tabs, EmptyState, TableSkeletonRow, Pagination, Select } from '../components/ui';
+import { useLanguage } from '../../context/LanguageContext';
+import { formatCurrency } from '../../utils/currency';
 
 const STATUSES = ['pending', 'confirmed', 'processing', 'completed', 'cancelled'];
 
-const statusColor = {
-    pending: 'bg-gray-100 text-gray-600',
-    confirmed: 'bg-blue-100 text-blue-700',
-    processing: 'bg-amber-100 text-amber-700',
-    completed: 'bg-green-100 text-green-700',
-    cancelled: 'bg-red-100 text-red-700',
+const statusTone = {
+    pending: 'slate',
+    confirmed: 'blue',
+    processing: 'amber',
+    completed: 'emerald',
+    cancelled: 'rose',
 };
 
 export default function OrdersAdmin() {
+    const { t } = useLanguage();
+    const [tab, setTab] = useState('active');
     const [orders, setOrders] = useState([]);
     const [meta, setMeta] = useState(null);
     const [page, setPage] = useState(1);
@@ -24,17 +30,19 @@ export default function OrdersAdmin() {
 
     const load = () => {
         setLoading(true);
+        setError('');
+        const path = tab === 'trashed' ? '/orders/trashed' : '/orders';
         adminApi
-            .get('/orders', { params: { page } })
+            .get(path, { params: { page } })
             .then((res) => {
                 setOrders(res.data?.data || []);
                 setMeta(res.data?.meta || null);
             })
-            .catch(() => setError('Failed to load orders.'))
+            .catch(() => setError(t('admin.orders.failedLoad')))
             .finally(() => setLoading(false));
     };
 
-    useEffect(load, [page]);
+    useEffect(load, [tab, page]);
 
     const handleStatusChange = async (order, status) => {
         setUpdatingStatus(true);
@@ -44,160 +52,291 @@ export default function OrdersAdmin() {
             setOrders((prev) => prev.map((o) => (o.id === order.id ? updated : o)));
             if (viewing?.id === order.id) setViewing(updated);
         } catch {
-            alert('Failed to update order status.');
+            alert(t('admin.orders.failedUpdateStatus'));
         } finally {
             setUpdatingStatus(false);
         }
     };
 
+    const handleDelete = async (order) => {
+        if (!window.confirm(`${t('admin.orders.deleteConfirm')} "${order.order_number}" ${t('admin.orders.deleteConfirmSuffix')}`)) return;
+        try {
+            await adminApi.delete(`/orders/${order.id}`);
+            setViewing(null);
+            load();
+        } catch {
+            alert(t('admin.orders.failedDelete'));
+        }
+    };
+
+    const handleRestore = async (order) => {
+        if (!window.confirm(`${t('admin.orders.restoreConfirm')} "${order.order_number}"?`)) return;
+        try {
+            await adminApi.post(`/orders/${order.id}/restore`);
+            setViewing(null);
+            load();
+        } catch {
+            alert(t('admin.orders.failedRestore'));
+        }
+    };
+
+    const handleForceDelete = async (order) => {
+        if (!window.confirm(`${t('admin.orders.permanentDeleteConfirm')} "${order.order_number}"? ${t('admin.orders.permanentDeleteWarning')}`)) return;
+        try {
+            await adminApi.delete(`/orders/${order.id}/force`);
+            setViewing(null);
+            load();
+        } catch {
+            alert(t('admin.orders.failedPermanentDelete'));
+        }
+    };
+
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-6">Orders</h1>
+            <PageHeader title={t('admin.orders.title')} subtitle={t('admin.orders.subtitle')} />
 
-            {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
-
-            <div className="bg-white rounded-xl border overflow-x-auto">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-500 text-left">
-                        <tr>
-                            <th className="px-4 py-3">Order #</th>
-                            <th className="px-4 py-3">Customer</th>
-                            <th className="px-4 py-3">Total</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Date</th>
-                            <th className="px-4 py-3 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {loading ? (
-                            <tr>
-                                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
-                                    Loading...
-                                </td>
-                            </tr>
-                        ) : orders.length === 0 ? (
-                            <tr>
-                                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
-                                    No orders yet.
-                                </td>
-                            </tr>
-                        ) : (
-                            orders.map((o) => (
-                                <tr key={o.id}>
-                                    <td className="px-4 py-3 font-medium">{o.order_number}</td>
-                                    <td className="px-4 py-3">{o.customer_name}</td>
-                                    <td className="px-4 py-3">${o.total_price}</td>
-                                    <td className="px-4 py-3">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusColor[o.status] || 'bg-gray-100'}`}>
-                                            {o.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-gray-500">
-                                        {o.created_at ? new Date(o.created_at).toLocaleDateString() : '—'}
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <button onClick={() => setViewing(o)} type="button" className="text-gray-500 hover:text-gray-900" title="View">
-                                            <Eye size={16} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+            <div className="flex items-center justify-between mb-4">
+                <Tabs
+                    value={tab}
+                    onChange={(v) => {
+                        setTab(v);
+                        setPage(1);
+                    }}
+                    options={[
+                        { value: 'active', label: t('admin.orders.tabActive') },
+                        { value: 'trashed', label: t('admin.orders.tabTrashed') },
+                    ]}
+                />
             </div>
 
-            {meta && meta.last_page > 1 && (
-                <div className="flex items-center justify-center gap-4 mt-4 text-sm">
-                    <button
-                        disabled={page <= 1}
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        type="button"
-                        className="px-3 py-1.5 rounded-lg border disabled:opacity-40"
-                    >
-                        Prev
-                    </button>
-                    <span className="text-gray-500">
-                        Page {meta.current_page} of {meta.last_page}
-                    </span>
-                    <button
-                        disabled={page >= meta.last_page}
-                        onClick={() => setPage((p) => p + 1)}
-                        type="button"
-                        className="px-3 py-1.5 rounded-lg border disabled:opacity-40"
-                    >
-                        Next
-                    </button>
+            {error && (
+                <div className="rounded-xl bg-rose-50 border border-rose-100 px-4 py-3 text-sm text-rose-600 font-medium mb-4">
+                    {error}
                 </div>
             )}
 
-            <Modal open={!!viewing} onClose={() => setViewing(null)} title={viewing?.order_number} wide>
+            <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="text-left border-b border-slate-100">
+                            <tr>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.orders.orderNumber')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.orders.customer')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.orders.total')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.orders.status')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.orders.date')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('admin.common.actions')}</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {loading ? (
+                                <TableSkeletonRow cols={6} />
+                            ) : orders.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6}>
+                                        <EmptyState
+                                            icon={tab === 'trashed' ? Trash : ShoppingCart}
+                                            title={tab === 'trashed' ? t('admin.orders.trashEmpty') : t('admin.orders.noOrders')}
+                                            subtitle={tab === 'trashed' ? t('admin.orders.trashHint') : t('admin.orders.newOrdersHint')}
+                                        />
+                                    </td>
+                                </tr>
+                            ) : (
+                                orders.map((o) => (
+                                    <tr key={o.id} onClick={() => setViewing(o)} className="hover:bg-slate-50/70 transition-colors cursor-pointer">
+                                        <td className="px-6 py-3.5 font-semibold text-slate-800">{o.order_number}</td>
+                                        <td className="px-6 py-3.5 text-slate-600">{o.customer_name}</td>
+                                        <td className="px-6 py-3.5 font-semibold text-slate-800">{formatCurrency(o.total_price)}</td>
+                                        <td className="px-6 py-3.5">
+                                            <Badge tone={statusTone[o.status] || 'slate'}>{t(`orderStatus.${o.status}`)}</Badge>
+                                        </td>
+                                        <td className="px-6 py-3.5 text-slate-400">
+                                            {o.created_at ? new Date(o.created_at).toLocaleDateString() : '—'}
+                                        </td>
+                                        <td className="px-6 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center justify-end gap-1.5">
+                                                <IconButton icon={Eye} tone="primary" onClick={() => setViewing(o)} title={t('admin.common.view')} />
+                                                {tab === 'active' ? (
+                                                    <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(o)} title={t('admin.common.delete')} />
+                                                ) : (
+                                                    <>
+                                                        <IconButton icon={RotateCcw} tone="success" onClick={() => handleRestore(o)} title={t('admin.common.restore')} />
+                                                        <IconButton icon={XCircle} tone="danger" onClick={() => handleForceDelete(o)} title={t('admin.common.permanentlyDelete')} />
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+                <Pagination meta={meta} page={page} onPageChange={setPage} />
+            </Card>
+
+            <Modal open={!!viewing} onClose={() => setViewing(null)} title={viewing?.order_number} subtitle={t('admin.orders.orderDetails')} wide>
                 {viewing && (
-                    <div className="space-y-4 text-sm">
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <span className="text-gray-400 block">Customer</span>
-                                {viewing.customer_name}
+                    <div className="space-y-5 text-sm">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div className="rounded-xl bg-slate-50 px-3.5 py-2.5">
+                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('admin.orders.customer')}</span>
+                                <span className="text-slate-800 font-medium">{viewing.customer_name}</span>
                             </div>
-                            <div>
-                                <span className="text-gray-400 block">Phone</span>
-                                {viewing.customer_phone}
+                            <div className="rounded-xl bg-slate-50 px-3.5 py-2.5">
+                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('admin.orders.phone')}</span>
+                                <span className="text-slate-800 font-medium">{viewing.customer_phone}</span>
                             </div>
-                            <div>
-                                <span className="text-gray-400 block">Email</span>
-                                {viewing.customer_email || '—'}
+                            <div className="rounded-xl bg-slate-50 px-3.5 py-2.5">
+                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('admin.orders.email')}</span>
+                                <span className="text-slate-800 font-medium">{viewing.customer_email || '—'}</span>
                             </div>
-                            <div>
-                                <span className="text-gray-400 block">Address</span>
-                                {viewing.customer_address || '—'}
+                            <div className="rounded-xl bg-slate-50 px-3.5 py-2.5 col-span-2 sm:col-span-3">
+                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('admin.orders.address')}</span>
+                                <span className="text-slate-800 font-medium">{viewing.customer_address || '—'}</span>
                             </div>
                         </div>
 
                         <div>
-                            <span className="text-gray-400 block mb-2">Items</span>
-                            <div className="border rounded-lg divide-y">
-                                {(viewing.items || []).map((item) => (
-                                    <div key={item.id} className="flex items-center justify-between px-3 py-2">
-                                        <span>
-                                            {item.product_name} × {item.quantity}
-                                        </span>
-                                        <span className="font-medium">${item.subtotal}</span>
-                                    </div>
-                                ))}
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide block mb-2.5">{t('admin.orders.items')}</span>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                {(viewing.items || []).map((item) => {
+                                    const hasItemDiscount = Number(item.discount_percent) > 0;
+                                    const subtotalBeforeDiscount = item.original_price * item.quantity;
+
+                                    return (
+                                        <div key={item.id} className="border border-slate-200 rounded-2xl p-3.5 bg-slate-50/60">
+                                            <ProductCard
+                                                product={{
+                                                    id: item.product_id,
+                                                    name: item.product_name,
+                                                    price: item.original_price,
+                                                    final_price: item.price,
+                                                    discount_percent: item.discount_percent,
+                                                    main_image: item.main_image,
+                                                }}
+                                            />
+
+                                            <div className="mt-3 pt-3 border-t border-slate-200 space-y-1.5 text-xs">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-slate-500">{t('admin.orders.priceBeforeDiscount')}</span>
+                                                    <span className={`font-medium text-slate-900 ${hasItemDiscount ? 'line-through text-slate-400' : ''}`}>
+                                                        {formatCurrency(item.original_price)}
+                                                    </span>
+                                                </div>
+
+                                                {hasItemDiscount && (
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-slate-500">{t('admin.orders.priceAfterDiscount')} ({item.discount_percent}% {t('admin.orders.off')})</span>
+                                                        <span className="font-medium text-emerald-600">{formatCurrency(item.price)}</span>
+                                                    </div>
+                                                )}
+
+                                                {item.color && (
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-slate-500">{t('admin.orders.color')}</span>
+                                                        <span className="font-medium text-slate-900">{item.color}</span>
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-slate-500">{t('admin.orders.quantity')}</span>
+                                                    <span className="font-medium text-slate-900">{item.quantity}</span>
+                                                </div>
+
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-slate-500">
+                                                        {t('admin.orders.subtotal')} {hasItemDiscount ? t('admin.orders.subtotalBeforeDiscount') : ''}
+                                                    </span>
+                                                    <span className={`font-medium text-slate-900 ${hasItemDiscount ? 'line-through text-slate-400' : ''}`}>
+                                                        {formatCurrency(subtotalBeforeDiscount)}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-slate-200">
+                                                    <span className="text-slate-700 font-semibold">{t('admin.orders.totalAfterDiscount')}</span>
+                                                    <span className="font-bold text-slate-900">{formatCurrency(item.subtotal)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-3 text-right border-t pt-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-right border-t border-slate-100 pt-4">
                             <div>
-                                <span className="text-gray-400 block">Subtotal</span>${viewing.subtotal_price}
+                                <span className="text-slate-400 block text-xs font-semibold">{t('admin.orders.originalPrice')}</span>
+                                <span className="font-semibold text-slate-800">{formatCurrency(viewing.subtotal_price)}</span>
                             </div>
                             <div>
-                                <span className="text-gray-400 block">Discount</span>-${viewing.discount_amount}
+                                <span className="text-slate-400 block text-xs font-semibold">{t('admin.orders.discount')}</span>
+                                <span className="font-semibold text-slate-800">-{formatCurrency(viewing.discount_amount)}</span>
                                 {viewing.first_order_discount_applied && (
-                                    <div className="text-xs text-green-600">First order</div>
+                                    <div className="text-[11px] text-emerald-600 font-medium">{t('admin.orders.includesFirstOrder')}</div>
                                 )}
                             </div>
                             <div>
-                                <span className="text-gray-400 block">Total</span>
-                                <span className="font-bold">${viewing.total_price}</span>
+                                <span className="text-slate-400 block text-xs font-semibold">{t('admin.orders.delivery')}</span>
+                                <span className="font-semibold text-slate-800">+{formatCurrency(viewing.delivery_fee ?? 0)}</span>
+                            </div>
+                            <div>
+                                <span className="text-slate-400 block text-xs font-semibold">{t('admin.orders.totalAfterDiscount')}</span>
+                                <span className="font-bold text-slate-900">{formatCurrency(viewing.total_price)}</span>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 pt-2">
-                            <span className="text-gray-400">Status:</span>
-                            <select
-                                value={viewing.status}
-                                disabled={updatingStatus}
-                                onChange={(e) => handleStatusChange(viewing, e.target.value)}
-                                className="border rounded-lg px-3 py-1.5 text-sm capitalize"
-                            >
-                                {STATUSES.map((s) => (
-                                    <option key={s} value={s}>
-                                        {s}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        {viewing.deleted_at ? (
+                            <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                                <div>
+                                    <span className="text-rose-500 text-xs font-semibold block">
+                                        {t('admin.orders.deletedOn')} {new Date(viewing.deleted_at).toLocaleString()}
+                                    </span>
+                                    <span className="text-slate-400 text-xs">{t('admin.orders.inRecycleBin')}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleRestore(viewing)}
+                                        type="button"
+                                        className="inline-flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 text-sm font-semibold"
+                                    >
+                                        <RotateCcw size={15} /> {t('admin.common.restore')}
+                                    </button>
+                                    <button
+                                        onClick={() => handleForceDelete(viewing)}
+                                        type="button"
+                                        className="inline-flex items-center gap-1.5 text-rose-500 hover:text-rose-600 text-sm font-semibold"
+                                    >
+                                        <XCircle size={15} /> {t('admin.orders.deletePermanently')}
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-slate-400 text-xs font-semibold">{t('admin.orders.status')}</span>
+                                    <Select
+                                        value={viewing.status}
+                                        disabled={updatingStatus}
+                                        onChange={(e) => handleStatusChange(viewing, e.target.value)}
+                                        className="capitalize py-1.5 w-40"
+                                    >
+                                        {STATUSES.map((s) => (
+                                            <option key={s} value={s}>
+                                                {t(`orderStatus.${s}`)}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </div>
+                                <button
+                                    onClick={() => handleDelete(viewing)}
+                                    type="button"
+                                    className="inline-flex items-center gap-1.5 text-rose-500 hover:text-rose-600 text-sm font-semibold"
+                                >
+                                    <Trash2 size={15} /> {t('admin.orders.deleteAction')}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </Modal>

@@ -4,9 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-// subtotal_price: مجموع أسعار المنتجات قبل أي خصم
-// discount_amount: قيمة الخصم المطبّق (خصم أول طلب 20% أو خصومات منتجات فردية)
-// total_price (الموجود مسبقاً): المبلغ النهائي بعد الخصم - هو يلي فعلياً على العميل يدفعه
 return new class extends Migration
 {
     public function up(): void

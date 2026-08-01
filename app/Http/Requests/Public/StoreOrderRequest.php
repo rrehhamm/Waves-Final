@@ -15,22 +15,13 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // ===== بيانات العميل =====
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:20'],
             'customer_email' => ['nullable', 'email', 'max:255'],
             'customer_address' => ['nullable', 'string', 'max:500'],
 
-            // ===== السلة (Cart) =====
-            // products: مصفوفة، لازم فيها عنصر واحد ع الأقل (min:1)
             'products' => ['required', 'array', 'min:1'],
 
-            // كل عنصر بالمصفوفة لازم يكون بالشكل: { "product_id": 1, "quantity": 2 }
-            //
-            // ملاحظة مهمة: exists:products,id العادية بتتحقق بس إن الصف موجود بالجدول،
-            // حتى لو كان محذوف Soft Delete أو status=false! فلازم نستثنيهم يدوياً هون
-            // (Rule::exists بيعمل استعلام مباشر على الجدول، مش عن طريق الموديل، فما بيتجاهل
-            // الصفوف المحذوفة تلقائياً زي ما بيصير مع Product::query() العادي)
             'products.*.product_id' => [
                 'required',
                 'integer',
@@ -39,12 +30,10 @@ class StoreOrderRequest extends FormRequest
                 }),
             ],
             'products.*.quantity' => ['required', 'integer', 'min:1'],
+            'products.*.color' => ['nullable', 'string', 'max:50'],
         ];
     }
 
-    /**
-     * رسائل خطأ مخصصة (اختياري) - بتساعد الـ front-end يعرض رسالة أوضح
-     */
     public function messages(): array
     {
         return [

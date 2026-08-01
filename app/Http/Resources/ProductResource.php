@@ -15,22 +15,18 @@ class ProductResource extends JsonResource
             'description' => trans_field($this, 'description'),
 
             'price' => (float) $this->price,
-            // discount_percent: نسبة الخصم يلي حطها الأدمن على هاد المنتج تحديداً (منفصل عن خصم أول طلب)
             'discount_percent' => $this->discount_percent,
-            // final_price: السعر الفعلي بعد الخصم - هاد يلي لازم يتعرض للعميل ويتحسب فيه
             'final_price' => $this->final_price,
             'quantity' => $this->quantity,
+            'sizes' => $this->sizes ?? [],
+            'colors' => $this->colors ?? [],
 
             'main_image' => image_url($this->main_image),
 
-            // additional_images مخزنة كـ array (بسبب casts 'array' بالموديل)
-            // بنمرر كل مسار على image_url() عشان نحولها لروابط كاملة
             'additional_images' => Collection::make($this->additional_images)
                 ->map(fn (string $path) => image_url($path))
                 ->values(),
 
-            // whenLoaded: بترجع بيانات الكاتيجوري/البراند بس إذا محمّلين مسبقاً
-            // (Product::with(['category','brand'])->get())
             'category' => new CategoryResource($this->whenLoaded('category')),
             'brand' => new BrandResource($this->whenLoaded('brand')),
 

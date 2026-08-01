@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-// Import local brand logo images from assets
 import nikeLogo from '../assets/nike-shoe.jpg';
 import adidasLogo from '../assets/adidas-shoe.jpg';
 import pumaLogo from '../assets/puma-shoe.jpg';
@@ -45,12 +44,10 @@ export const MAIN_BRANDS = [
 const BrandCard = ({ name, tagline, logo, description, link }) => {
     return (
         <div className="flex flex-col group">
-            {/* Card Container with Modern Frosted Aesthetic */}
             <Link
                 to={link || '#'}
                 className="bg-neutral-900 rounded-[32px] h-[380px] sm:h-[420px] w-full flex items-center justify-center relative overflow-hidden mb-3 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-[#81A6C6]/20 border border-white/10 group-hover:border-[#81A6C6]/40"
             >
-                {/* Brand Image */}
                 <img
                     src={logo}
                     alt={name}
@@ -61,10 +58,8 @@ const BrandCard = ({ name, tagline, logo, description, link }) => {
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                 />
 
-                {/* Ambient Dark Gradient Gradient for Readability */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
 
-                {/* Glassmorphic Overlay Panel */}
                 <div className="absolute inset-x-3 bottom-3 p-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 flex flex-col justify-end transition-all duration-300 group-hover:bg-black/60 group-hover:border-[#81A6C6]/30">
                     <div className="flex items-center justify-between mb-1.5 gap-2">
                         <span className="text-white font-bold text-base sm:text-lg tracking-wide group-hover:text-[#81A6C6] transition-colors">

@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-// بنستخدمه بدل ما نرجع موديل User الخام، عشان نحول profile_picture لرابط كامل (زي باقي الصور بالمشروع)
 class UserResource extends JsonResource
 {
     public function toArray($request): array

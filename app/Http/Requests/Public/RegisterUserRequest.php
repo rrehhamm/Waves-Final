@@ -16,10 +16,8 @@ class RegisterUserRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
 
-            // unique:users,email : لازم الإيميل ما يكون مستخدم من عميل تاني قبل
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
 
-            // confirmed: بيدور على حقل اسمه "password_confirmation" ويتأكد إنه مطابق
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }

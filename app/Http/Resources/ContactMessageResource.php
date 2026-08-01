@@ -4,8 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-// هاد الـ Resource بيستخدمه الأدمن بس (Dashboard)، مش الزوار
-// عشان هيك ما فيه داعي لدعم لغتين هون
 class ContactMessageResource extends JsonResource
 {
     public function toArray($request): array

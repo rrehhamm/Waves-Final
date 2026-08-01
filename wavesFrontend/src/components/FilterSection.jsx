@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 const FilterSection = ({
     categories = [],
@@ -10,10 +11,8 @@ const FilterSection = ({
     maxPrice,
     setMaxPrice,
 }) => {
-    // Filter options must be the real backend categories/brands only - the decorative
-    // MAIN_CATEGORIES/MAIN_BRANDS placeholders use fake string ids ('sports', 'nike'...)
-    // that don't correspond to any real category_id/brand_id, so mixing them in here
-    // made clicking them silently return zero products from the API.
+    const { t } = useLanguage();
+
     const mergedCategories = categories.map((cat) => ({
         id: cat.id,
         name: cat.name_en || cat.name,
@@ -26,17 +25,16 @@ const FilterSection = ({
 
     return (
         <div className="border border-gray-200 rounded-2xl p-5 bg-white space-y-6 text-sm shadow-sm">
-            <h3 className="font-bold text-black border-b pb-3 text-base">Filters</h3>
+            <h3 className="font-bold text-black border-b pb-3 text-base">{t('filters.title')}</h3>
 
-            {/* Categories Filter List */}
             <div>
-                <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Category</h4>
+                <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">{t('filters.category')}</h4>
                 <div className="space-y-1.5">
                     <button
                         onClick={() => setSelectedCategory('')}
                         className={`block w-full text-left text-xs py-1 transition-colors ${!selectedCategory ? 'font-bold text-black' : 'text-gray-600 hover:text-black'}`}
                     >
-                        All Categories
+                        {t('filters.allCategories')}
                     </button>
                     {mergedCategories.map((cat) => {
                         const isSelected =
@@ -56,15 +54,14 @@ const FilterSection = ({
                 </div>
             </div>
 
-            {/* Brands Filter List */}
             <div>
-                <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Brand</h4>
+                <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">{t('filters.brand')}</h4>
                 <div className="space-y-1.5">
                     <button
                         onClick={() => setSelectedBrand('')}
                         className={`block w-full text-left text-xs py-1 transition-colors ${!selectedBrand ? 'font-bold text-black' : 'text-gray-600 hover:text-black'}`}
                     >
-                        All Brands
+                        {t('filters.allBrands')}
                     </button>
                     {mergedBrands.map((b) => {
                         const isSelected =
@@ -84,10 +81,9 @@ const FilterSection = ({
                 </div>
             </div>
 
-            {/* Price Slider Filter */}
             <div>
                 <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wider">Max Price</h4>
+                    <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wider">{t('filters.maxPrice')}</h4>
                     <span className="font-bold text-xs">JD{maxPrice}</span>
                 </div>
                 <input
