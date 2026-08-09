@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import adminApi from '../api/adminApi';
-import { useLanguage } from '../../context/LanguageContext';
+import { useAdminLanguage } from '../context/AdminLanguageContext';
 import '../admin.css';
 import {
     LayoutDashboard,
@@ -24,48 +24,49 @@ import {
     Menu,
     X,
     ChevronDown,
+    Languages,
     Waves,
 } from 'lucide-react';
 
 function buildNavGroups(t) {
     return [
         {
-            label: t('admin.nav.overview'),
-            items: [{ to: '/admin', label: t('admin.nav.dashboard'), icon: LayoutDashboard, end: true }],
+            label: t('nav.overview'),
+            items: [{ to: '/admin', label: t('nav.dashboard'), icon: LayoutDashboard, end: true }],
         },
         {
-            label: t('admin.nav.catalog'),
+            label: t('nav.catalog'),
             items: [
-                { to: '/admin/products', label: t('admin.nav.products'), icon: Package },
-                { to: '/admin/categories', label: t('admin.nav.categories'), icon: FolderTree },
-                { to: '/admin/brands', label: t('admin.nav.brands'), icon: Tags },
+                { to: '/admin/products', label: t('nav.products'), icon: Package },
+                { to: '/admin/categories', label: t('nav.categories'), icon: FolderTree },
+                { to: '/admin/brands', label: t('nav.brands'), icon: Tags },
             ],
         },
         {
-            label: t('admin.nav.content'),
+            label: t('nav.content'),
             items: [
-                { to: '/admin/hero', label: t('admin.nav.heroSection'), icon: PanelTop },
-                { to: '/admin/banners', label: t('admin.nav.banners'), icon: ImageIcon },
-                { to: '/admin/gallery', label: t('admin.nav.gallery'), icon: GalleryHorizontal },
+                { to: '/admin/hero', label: t('nav.heroSection'), icon: PanelTop },
+                { to: '/admin/banners', label: t('nav.banners'), icon: ImageIcon },
+                { to: '/admin/gallery', label: t('nav.gallery'), icon: GalleryHorizontal },
             ],
         },
         {
-            label: t('admin.nav.sales'),
-            items: [{ to: '/admin/orders', label: t('admin.nav.orders'), icon: ShoppingCart }],
+            label: t('nav.sales'),
+            items: [{ to: '/admin/orders', label: t('nav.orders'), icon: ShoppingCart }],
         },
         {
-            label: t('admin.nav.support'),
-            items: [{ to: '/admin/messages', label: t('admin.nav.contactMessages'), icon: Mail }],
+            label: t('nav.support'),
+            items: [{ to: '/admin/messages', label: t('nav.contactMessages'), icon: Mail }],
         },
         {
-            label: t('admin.nav.configuration'),
-            items: [{ to: '/admin/settings', label: t('admin.nav.settings'), icon: Settings }],
+            label: t('nav.configuration'),
+            items: [{ to: '/admin/settings', label: t('nav.settings'), icon: Settings }],
         },
     ];
 }
 
 export default function AdminLayout() {
-    const { t } = useLanguage();
+    const { t, dir, language, toggleLanguage } = useAdminLanguage();
     const { admin, logout } = useAdminAuth();
     const navigate = useNavigate();
 
@@ -84,7 +85,7 @@ export default function AdminLayout() {
         adminApi
             .get('/dashboard')
             .then((res) => setStats(res.data?.data || null))
-            .catch(() => {});
+            .catch(() => { });
     }, []);
 
     useEffect(() => {
@@ -111,7 +112,7 @@ export default function AdminLayout() {
     const unread = stats?.unread_messages_count || 0;
 
     return (
-        <div className="admin-shell min-h-screen flex bg-slate-50 text-slate-900 font-sans">
+        <div dir={dir} lang={language} className="admin-shell min-h-screen flex bg-slate-50 text-slate-900 font-sans">
             {mobileOpen && (
                 <div
                     className="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-[1px] lg:hidden"
@@ -120,9 +121,9 @@ export default function AdminLayout() {
             )}
 
             <aside
-                className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white border-r border-slate-200/80 transition-all duration-200 ease-out
+                className={`fixed inset-y-0 start-0 z-40 flex flex-col bg-white border-e border-slate-200/80 transition-all duration-200 ease-out
                 lg:static lg:translate-x-0
-                ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                ${mobileOpen ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full lg:translate-x-0'}
                 ${collapsed ? 'w-[76px]' : 'w-64'}`}
             >
                 <div className={`flex items-center h-16 shrink-0 border-b border-slate-100 ${collapsed ? 'justify-center px-2' : 'justify-between px-5'}`}>
@@ -133,7 +134,7 @@ export default function AdminLayout() {
                         {!collapsed && (
                             <div className="leading-tight">
                                 <div className="text-sm font-extrabold tracking-tight text-slate-900">WAVES</div>
-                                <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">{t('admin.nav.adminPanel')}</div>
+                                <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">{t('nav.adminPanel')}</div>
                             </div>
                         )}
                     </div>
@@ -163,24 +164,22 @@ export default function AdminLayout() {
                                         onClick={() => setMobileOpen(false)}
                                         title={collapsed ? label : undefined}
                                         className={({ isActive }) =>
-                                            `group relative flex items-center gap-3 rounded-xl text-sm font-medium transition-colors duration-150 ${
-                                                collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'
-                                            } ${
-                                                isActive
-                                                    ? 'bg-[#81A6C6]/12 text-[#3A5A73]'
-                                                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                                            `group relative flex items-center gap-3 rounded-xl text-sm font-medium transition-colors duration-150 ${collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'
+                                            } ${isActive
+                                                ? 'bg-[#81A6C6]/12 text-[#3A5A73]'
+                                                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                                             }`
                                         }
                                     >
                                         {({ isActive }) => (
                                             <>
                                                 {isActive && (
-                                                    <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-[#81A6C6]" />
+                                                    <span className="absolute start-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-e-full bg-[#81A6C6]" />
                                                 )}
                                                 <Icon size={17} className="shrink-0" />
                                                 {!collapsed && <span className="truncate">{label}</span>}
                                                 {!collapsed && to === '/admin/messages' && unread > 0 && (
-                                                    <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold">
+                                                    <span className="ms-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold">
                                                         {unread}
                                                     </span>
                                                 )}
@@ -198,23 +197,23 @@ export default function AdminLayout() {
                         href="/"
                         target="_blank"
                         rel="noreferrer"
-                        title={collapsed ? t('admin.nav.viewStorefront') : undefined}
-                        className={`flex items-center gap-3 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors ${
-                            collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'
-                        }`}
+                        title={collapsed ? t('nav.viewStorefront') : undefined}
+                        className={`flex items-center gap-3 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors ${collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'
+                            }`}
                     >
                         <ExternalLink size={17} className="shrink-0" />
-                        {!collapsed && <span>{t('admin.nav.viewStorefront')}</span>}
+                        {!collapsed && <span>{t('nav.viewStorefront')}</span>}
                     </a>
                     <button
                         onClick={() => setCollapsed((c) => !c)}
                         type="button"
-                        className={`hidden lg:flex w-full items-center gap-3 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors ${
-                            collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'
-                        }`}
+                        className={`hidden lg:flex w-full items-center gap-3 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors ${collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'
+                            }`}
                     >
-                        {collapsed ? <ChevronsRight size={17} /> : <ChevronsLeft size={17} />}
-                        {!collapsed && <span>{t('admin.nav.collapse')}</span>}
+                        {collapsed
+                            ? (dir === 'rtl' ? <ChevronsLeft size={17} /> : <ChevronsRight size={17} />)
+                            : (dir === 'rtl' ? <ChevronsRight size={17} /> : <ChevronsLeft size={17} />)}
+                        {!collapsed && <span>{t('nav.collapse')}</span>}
                     </button>
                 </div>
             </aside>
@@ -230,7 +229,7 @@ export default function AdminLayout() {
                     </button>
 
                     <div className="relative flex-1 max-w-sm">
-                        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Search size={15} className="absolute start-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
@@ -240,8 +239,8 @@ export default function AdminLayout() {
                                 if (e.key === 'Enter' && matches.length > 0) goTo(matches[0].to);
                                 if (e.key === 'Escape') setQuery('');
                             }}
-                            placeholder={t('admin.nav.searchPlaceholder')}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#81A6C6]/25 focus:border-[#81A6C6] focus:bg-white transition-colors duration-150"
+                            placeholder={t('nav.searchPlaceholder')}
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 ps-9 pe-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#81A6C6]/25 focus:border-[#81A6C6] focus:bg-white transition-colors duration-150"
                         />
                         {searchFocused && matches.length > 0 && (
                             <div className="absolute mt-1.5 w-full bg-white rounded-xl border border-slate-200 shadow-lg shadow-slate-900/5 overflow-hidden z-30">
@@ -260,15 +259,27 @@ export default function AdminLayout() {
                         )}
                     </div>
 
-                    <div className="ml-auto flex items-center gap-2">
+                    <div className="ms-auto flex items-center gap-2">
+                        <button
+                            onClick={toggleLanguage}
+                            type="button"
+                            title={language === 'en' ? 'التبديل إلى العربية' : 'Switch to English'}
+                            className="w-9 h-9 inline-flex items-center justify-center gap-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors sm:w-auto sm:px-3"
+                        >
+                            <Languages size={17} />
+                            <span className="hidden sm:inline text-xs font-semibold">
+                                {language === 'en' ? 'العربية' : 'English'}
+                            </span>
+                        </button>
+
                         <NavLink
                             to="/admin/messages"
                             className="relative w-9 h-9 inline-flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-                            title={t('admin.nav.contactMessages')}
+                            title={t('nav.contactMessages')}
                         >
                             <Bell size={17} />
                             {unread > 0 && (
-                                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                                <span className="absolute top-1.5 end-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
                             )}
                         </NavLink>
 
@@ -276,14 +287,14 @@ export default function AdminLayout() {
                             <button
                                 onClick={() => setProfileOpen((o) => !o)}
                                 type="button"
-                                className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-xl hover:bg-slate-100 transition-colors"
+                                className="flex items-center gap-2 ps-2 pe-2.5 py-1.5 rounded-xl hover:bg-slate-100 transition-colors"
                             >
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#81A6C6] to-[#AACDDC] text-white flex items-center justify-center text-xs font-bold shrink-0">
                                     {(admin?.name || admin?.email || 'A').charAt(0).toUpperCase()}
                                 </div>
-                                <div className="hidden sm:block text-left leading-tight">
+                                <div className="hidden sm:block text-start leading-tight">
                                     <div className="text-xs font-semibold text-slate-800 max-w-[120px] truncate">
-                                        {admin?.name || t('admin.nav.admin')}
+                                        {admin?.name || t('nav.admin')}
                                     </div>
                                     <div className="text-[10px] text-slate-400 max-w-[120px] truncate">{admin?.email}</div>
                                 </div>
@@ -291,9 +302,9 @@ export default function AdminLayout() {
                             </button>
 
                             {profileOpen && (
-                                <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl border border-slate-200 shadow-lg shadow-slate-900/5 overflow-hidden z-30 animate-[scaleIn_0.12s_ease-out]">
+                                <div className="absolute end-0 mt-2 w-52 bg-white rounded-xl border border-slate-200 shadow-lg shadow-slate-900/5 overflow-hidden z-30 animate-[scaleIn_0.12s_ease-out]">
                                     <div className="px-4 py-3 border-b border-slate-100">
-                                        <div className="text-sm font-semibold text-slate-800 truncate">{admin?.name || t('admin.nav.admin')}</div>
+                                        <div className="text-sm font-semibold text-slate-800 truncate">{admin?.name || t('nav.admin')}</div>
                                         <div className="text-xs text-slate-400 truncate">{admin?.email}</div>
                                     </div>
                                     <button
@@ -302,7 +313,7 @@ export default function AdminLayout() {
                                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors"
                                     >
                                         <LogOut size={15} />
-                                        {t('admin.nav.signOut')}
+                                        {t('nav.signOut')}
                                     </button>
                                 </div>
                             )}

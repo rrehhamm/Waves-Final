@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import { AdminLanguageProvider } from './admin/context/AdminLanguageContext';
 
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -40,105 +41,107 @@ import OrdersAdmin from './admin/pages/OrdersAdmin';
 import SiteSettingsAdmin from './admin/pages/SiteSettingsAdmin';
 
 function RequireAuth({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+    const { isAuthenticated, loading } = useAuth();
 
-  if (loading) return null;
+    if (loading) return null;
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+    return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
 function StorefrontRoutes() {
-  const { logout } = useAuth();
+    const { logout } = useAuth();
 
-  return (
-    <div className="min-h-screen flex flex-col justify-between font-sans bg-white text-black">
-      <div>
-        <Navbar />
+    return (
+        <div className="min-h-screen flex flex-col justify-between font-sans bg-white text-black">
+            <div>
+                <Navbar />
 
-        <Routes>
-          <Route index element={<Home />} />
-          <Route path="categories" element={<Categories />} />
-          <Route path="brands" element={<Brands />} />
-          <Route path="products" element={<Products />} />
-          <Route path="products/:id" element={<ProductDetails />} />
-          <Route path="search" element={<SearchResults />} />
-          <Route path="gallery" element={<Gallery />} />
-          <Route path="contact" element={<ContactUs />} />
-          <Route path="cart" element={<Cart />} />
-          <Route
-            path="profile"
-            element={
-              <RequireAuth>
-                <Profile onLogout={logout} />
-              </RequireAuth>
-            }
-          />
-          <Route path="signup" element={<SignUp />} />
-          <Route path="login" element={<Login />} />
-          <Route
-            path="checkout"
-            element={
-              <RequireAuth>
-                <Checkout />
-              </RequireAuth>
-            }
-          />
+                <Routes>
+                    <Route index element={<Home />} />
+                    <Route path="categories" element={<Categories />} />
+                    <Route path="brands" element={<Brands />} />
+                    <Route path="products" element={<Products />} />
+                    <Route path="products/:id" element={<ProductDetails />} />
+                    <Route path="search" element={<SearchResults />} />
+                    <Route path="gallery" element={<Gallery />} />
+                    <Route path="contact" element={<ContactUs />} />
+                    <Route path="cart" element={<Cart />} />
+                    <Route
+                        path="profile"
+                        element={
+                            <RequireAuth>
+                                <Profile onLogout={logout} />
+                            </RequireAuth>
+                        }
+                    />
+                    <Route path="signup" element={<SignUp />} />
+                    <Route path="login" element={<Login />} />
+                    <Route
+                        path="checkout"
+                        element={
+                            <RequireAuth>
+                                <Checkout />
+                            </RequireAuth>
+                        }
+                    />
 
-          <Route path="*" element={<div className="p-12 text-center text-lg font-bold">404 - Page Not Found</div>} />
-        </Routes>
-      </div>
+                    <Route path="*" element={<div className="p-12 text-center text-lg font-bold">404 - Page Not Found</div>} />
+                </Routes>
+            </div>
 
-      <Footer />
-    </div>
-  );
+            <Footer />
+        </div>
+    );
 }
 
 function AdminRoutes() {
-  return (
-    <Routes>
-      <Route path="login" element={<AdminLogin />} />
-      <Route
-        element={
-          <RequireAdminAuth>
-            <AdminLayout />
-          </RequireAdminAuth>
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="hero" element={<HeroSectionAdmin />} />
-        <Route path="categories" element={<CategoriesAdmin />} />
-        <Route path="brands" element={<BrandsAdmin />} />
-        <Route path="products" element={<ProductsAdmin />} />
-        <Route path="banners" element={<BannersAdmin />} />
-        <Route path="gallery" element={<GalleryAdmin />} />
-        <Route path="messages" element={<ContactMessagesAdmin />} />
-        <Route path="orders" element={<OrdersAdmin />} />
-        <Route path="settings" element={<SiteSettingsAdmin />} />
-      </Route>
-    </Routes>
-  );
+    return (
+        <AdminLanguageProvider>
+            <Routes>
+                <Route path="login" element={<AdminLogin />} />
+                <Route
+                    element={
+                        <RequireAdminAuth>
+                            <AdminLayout />
+                        </RequireAdminAuth>
+                    }
+                >
+                    <Route index element={<Dashboard />} />
+                    <Route path="hero" element={<HeroSectionAdmin />} />
+                    <Route path="categories" element={<CategoriesAdmin />} />
+                    <Route path="brands" element={<BrandsAdmin />} />
+                    <Route path="products" element={<ProductsAdmin />} />
+                    <Route path="banners" element={<BannersAdmin />} />
+                    <Route path="gallery" element={<GalleryAdmin />} />
+                    <Route path="messages" element={<ContactMessagesAdmin />} />
+                    <Route path="orders" element={<OrdersAdmin />} />
+                    <Route path="settings" element={<SiteSettingsAdmin />} />
+                </Route>
+            </Routes>
+        </AdminLanguageProvider>
+    );
 }
 
 function App() {
-  return (
-    <LanguageProvider>
-      <SiteSettingsProvider>
-        <AuthProvider>
-          <ToastProvider>
-            <CartProvider>
-              <AdminAuthProvider>
-                <ScrollToTop />
-                <Routes>
-                  <Route path="/admin/*" element={<AdminRoutes />} />
-                  <Route path="/*" element={<StorefrontRoutes />} />
-                </Routes>
-              </AdminAuthProvider>
-            </CartProvider>
-          </ToastProvider>
-        </AuthProvider>
-      </SiteSettingsProvider>
-    </LanguageProvider>
-  );
+    return (
+        <LanguageProvider>
+            <SiteSettingsProvider>
+                <AuthProvider>
+                    <ToastProvider>
+                        <CartProvider>
+                            <AdminAuthProvider>
+                                <ScrollToTop />
+                                <Routes>
+                                    <Route path="/admin/*" element={<AdminRoutes />} />
+                                    <Route path="/*" element={<StorefrontRoutes />} />
+                                </Routes>
+                            </AdminAuthProvider>
+                        </CartProvider>
+                    </ToastProvider>
+                </AuthProvider>
+            </SiteSettingsProvider>
+        </LanguageProvider>
+    );
 }
 
 export default App;
