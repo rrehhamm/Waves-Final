@@ -3,12 +3,12 @@ import adminApi from '../api/adminApi';
 import Modal from '../components/Modal';
 import { Pencil, Trash2, Plus, ToggleLeft, ToggleRight, ArrowUp, ArrowDown, GalleryHorizontal, ImageOff } from 'lucide-react';
 import { Card, PageHeader, Button, IconButton, Badge, Input, Textarea, Toggle, EmptyState, TableSkeletonRow, FormError } from '../components/ui';
-import { useLanguage } from '../../context/LanguageContext';
+import { useAdminLanguage } from '../context/AdminLanguageContext';
 
 const emptyForm = { title: '', description: '', status: true, image: null };
 
 export default function GalleryAdmin() {
-    const { t } = useLanguage();
+    const { t } = useAdminLanguage();
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -25,7 +25,7 @@ export default function GalleryAdmin() {
         adminApi
             .get('/gallery')
             .then((res) => setImages((res.data?.data || []).slice().sort((a, b) => a.sort_order - b.sort_order)))
-            .catch(() => setError(t('admin.gallery.failedLoad')))
+            .catch(() => setError(t('gallery.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -69,19 +69,19 @@ export default function GalleryAdmin() {
             load();
         } catch (err) {
             const errors = err.response?.data?.errors;
-            setFormError(errors ? Object.values(errors).flat().join(' ') : t('admin.common.somethingWrong'));
+            setFormError(errors ? Object.values(errors).flat().join(' ') : t('common.somethingWrong'));
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (img) => {
-        if (!window.confirm(t('admin.gallery.deleteConfirm'))) return;
+        if (!window.confirm(t('gallery.deleteConfirm'))) return;
         try {
             await adminApi.delete(`/gallery/${img.id}`);
             load();
         } catch {
-            alert(t('admin.gallery.failedDelete'));
+            alert(t('gallery.failedDelete'));
         }
     };
 
@@ -90,7 +90,7 @@ export default function GalleryAdmin() {
             await adminApi.patch(`/gallery/${img.id}/toggle-status`);
             load();
         } catch {
-            alert(t('admin.gallery.failedToggle'));
+            alert(t('gallery.failedToggle'));
         }
     };
 
@@ -108,7 +108,7 @@ export default function GalleryAdmin() {
             });
             load();
         } catch {
-            alert(t('admin.gallery.failedReorder'));
+            alert(t('gallery.failedReorder'));
             load();
         }
     };
@@ -116,11 +116,11 @@ export default function GalleryAdmin() {
     return (
         <div>
             <PageHeader
-                title={t('admin.gallery.title')}
-                subtitle={t('admin.gallery.subtitle')}
+                title={t('gallery.title')}
+                subtitle={t('gallery.subtitle')}
                 actions={
                     <Button onClick={openCreate} icon={Plus}>
-                        {t('admin.gallery.addImage')}
+                        {t('gallery.addImage')}
                     </Button>
                 }
             />
@@ -132,11 +132,11 @@ export default function GalleryAdmin() {
                     <table className="w-full text-sm">
                         <thead className="text-left border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.gallery.order')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.gallery.image')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.gallery.titleField')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.status')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('admin.common.actions')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('gallery.order')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('gallery.image')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('gallery.titleField')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('common.status')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -145,7 +145,7 @@ export default function GalleryAdmin() {
                             ) : images.length === 0 ? (
                                 <tr>
                                     <td colSpan={5}>
-                                        <EmptyState icon={GalleryHorizontal} title={t('admin.gallery.noImages')} subtitle={t('admin.gallery.addFirst')} />
+                                        <EmptyState icon={GalleryHorizontal} title={t('gallery.noImages')} subtitle={t('gallery.addFirst')} />
                                     </td>
                                 </tr>
                             ) : (
@@ -168,7 +168,7 @@ export default function GalleryAdmin() {
                                         </td>
                                         <td className="px-6 py-3 font-semibold text-slate-800">{img.title || '—'}</td>
                                         <td className="px-6 py-3">
-                                            <Badge tone={img.status ? 'emerald' : 'slate'}>{img.status ? t('admin.gallery.statusVisible') : t('admin.gallery.statusHidden')}</Badge>
+                                            <Badge tone={img.status ? 'emerald' : 'slate'}>{img.status ? t('gallery.statusVisible') : t('gallery.statusHidden')}</Badge>
                                         </td>
                                         <td className="px-6 py-3 text-right">
                                             <div className="flex items-center justify-end gap-1.5">
@@ -176,10 +176,10 @@ export default function GalleryAdmin() {
                                                     icon={img.status ? ToggleRight : ToggleLeft}
                                                     tone={img.status ? 'success' : 'default'}
                                                     onClick={() => handleToggle(img)}
-                                                    title={t('admin.gallery.showHide')}
+                                                    title={t('gallery.showHide')}
                                                 />
-                                                <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(img)} title={t('admin.common.edit')} />
-                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(img)} title={t('admin.common.delete')} />
+                                                <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(img)} title={t('common.edit')} />
+                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(img)} title={t('common.delete')} />
                                             </div>
                                         </td>
                                     </tr>
@@ -190,20 +190,20 @@ export default function GalleryAdmin() {
                 </div>
             </Card>
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('admin.gallery.editImage') : t('admin.gallery.addImage')}>
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('gallery.editImage') : t('gallery.addImage')}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <FormError message={formError} />
 
-                    <Input label={t('admin.gallery.titleField')} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+                    <Input label={t('gallery.titleField')} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
                     <Textarea
-                        label={t('admin.gallery.description')}
+                        label={t('gallery.description')}
                         value={form.description}
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
                         rows={2}
                     />
                     <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                            {t('admin.gallery.image')} {editing ? t('admin.common.keepCurrentImage') : ''}
+                            {t('gallery.image')} {editing ? t('common.keepCurrentImage') : ''}
                         </label>
                         <input
                             type="file"
@@ -218,13 +218,13 @@ export default function GalleryAdmin() {
                         />
                         {preview && <img src={preview} alt="preview" className="mt-2.5 w-16 h-16 rounded-lg object-cover border border-slate-200" />}
                     </div>
-                    <Toggle label={t('admin.gallery.visible')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+                    <Toggle label={t('gallery.visible')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
                     <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
                         <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
-                            {t('admin.common.cancel')}
+                            {t('common.cancel')}
                         </Button>
                         <Button type="submit" disabled={saving}>
-                            {saving ? t('admin.common.saving') : t('admin.gallery.saveImage')}
+                            {saving ? t('common.saving') : t('gallery.saveImage')}
                         </Button>
                     </div>
                 </form>

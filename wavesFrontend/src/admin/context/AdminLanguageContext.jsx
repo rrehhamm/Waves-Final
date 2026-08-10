@@ -20,11 +20,19 @@ export const AdminLanguageProvider = ({ children }) => {
 
     const toggleLanguage = () => setLanguage(language === 'en' ? 'ar' : 'en');
 
-    // Reads from the "admin" branch only, so calls stay short: t('nav.dashboard') not t('admin.nav.dashboard')
     const t = (path, vars) => {
         const lookup = (dict) =>
             path.split('.').reduce((acc, part) => (acc && acc[part] !== undefined ? acc[part] : undefined), dict);
-        const value = lookup(translations[language]?.admin) ?? lookup(translations.en?.admin) ?? path;
+        // Look inside translations[language].admin first (admin-only strings),
+        // then fall back to the shared/site-wide tree in the same language
+        // (e.g. orderStatus, which lives outside the admin branch), then repeat
+        // both lookups in English as a last resort.
+        const value =
+            lookup(translations[language]?.admin) ??
+            lookup(translations[language]) ??
+            lookup(translations.en?.admin) ??
+            lookup(translations.en) ??
+            path;
         if (typeof value === 'string' && vars) {
             return Object.keys(vars).reduce((str, key) => str.replaceAll(`{{${key}}}`, vars[key]), value);
         }

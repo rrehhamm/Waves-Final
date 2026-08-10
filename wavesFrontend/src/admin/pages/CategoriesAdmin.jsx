@@ -3,12 +3,12 @@ import adminApi from '../api/adminApi';
 import Modal from '../components/Modal';
 import { Pencil, Trash2, Plus, Star, FolderTree, ImageOff } from 'lucide-react';
 import { Card, PageHeader, Button, IconButton, Badge, Input, Textarea, Toggle, EmptyState, TableSkeletonRow, FormError } from '../components/ui';
-import { useLanguage } from '../../context/LanguageContext';
+import { useAdminLanguage } from '../context/AdminLanguageContext';
 
 const emptyForm = { name_ar: '', name_en: '', description: '', status: true, featured: false, image: null };
 
 export default function CategoriesAdmin() {
-    const { t } = useLanguage();
+    const { t } = useAdminLanguage();
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -27,7 +27,7 @@ export default function CategoriesAdmin() {
         adminApi
             .get('/categories')
             .then((res) => setCategories(res.data?.data || []))
-            .catch(() => setError(t('admin.categories.failedLoad')))
+            .catch(() => setError(t('categories.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -79,14 +79,14 @@ export default function CategoriesAdmin() {
             load();
         } catch (err) {
             const errors = err.response?.data?.errors;
-            setFormError(errors ? Object.values(errors).flat().join(' ') : t('admin.common.somethingWrong'));
+            setFormError(errors ? Object.values(errors).flat().join(' ') : t('common.somethingWrong'));
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (cat) => {
-        if (!window.confirm(`${t('admin.categories.deleteConfirm')} "${cat.name}"?`)) return;
+        if (!window.confirm(`${t('categories.deleteConfirm')} "${cat.name}"?`)) return;
         try {
             await adminApi.delete(`/categories/${cat.id}`);
             load();
@@ -94,7 +94,7 @@ export default function CategoriesAdmin() {
             if (err.response?.status === 409) {
                 setBlockingInfo({ category: cat, products: err.response.data?.blocking_products || [] });
             } else {
-                alert(t('admin.categories.failedDelete'));
+                alert(t('categories.failedDelete'));
             }
         }
     };
@@ -102,11 +102,11 @@ export default function CategoriesAdmin() {
     return (
         <div>
             <PageHeader
-                title={t('admin.categories.title')}
-                subtitle={t('admin.categories.subtitle')}
+                title={t('categories.title')}
+                subtitle={t('categories.subtitle')}
                 actions={
                     <Button onClick={openCreate} icon={Plus}>
-                        {t('admin.categories.newCategory')}
+                        {t('categories.newCategory')}
                     </Button>
                 }
             />
@@ -118,11 +118,11 @@ export default function CategoriesAdmin() {
                     <table className="w-full text-sm">
                         <thead className="text-left border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.image')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.name')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.status')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.categories.featured')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('admin.common.actions')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('common.image')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('common.name')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('common.status')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('categories.featured')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -131,7 +131,7 @@ export default function CategoriesAdmin() {
                             ) : categories.length === 0 ? (
                                 <tr>
                                     <td colSpan={5}>
-                                        <EmptyState icon={FolderTree} title={t('admin.categories.noCategories')} subtitle={t('admin.categories.createFirst')} />
+                                        <EmptyState icon={FolderTree} title={t('categories.noCategories')} subtitle={t('categories.createFirst')} />
                                     </td>
                                 </tr>
                             ) : (
@@ -148,7 +148,7 @@ export default function CategoriesAdmin() {
                                         </td>
                                         <td className="px-6 py-3 font-semibold text-slate-800">{cat.name}</td>
                                         <td className="px-6 py-3">
-                                            <Badge tone={cat.status ? 'emerald' : 'slate'}>{cat.status ? t('admin.common.active') : t('admin.common.inactive')}</Badge>
+                                            <Badge tone={cat.status ? 'emerald' : 'slate'}>{cat.status ? t('common.active') : t('common.inactive')}</Badge>
                                         </td>
                                         <td className="px-6 py-3">
                                             {cat.featured ? (
@@ -159,8 +159,8 @@ export default function CategoriesAdmin() {
                                         </td>
                                         <td className="px-6 py-3 text-right">
                                             <div className="flex items-center justify-end gap-1.5">
-                                                <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(cat)} title={t('admin.common.edit')} />
-                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(cat)} title={t('admin.common.delete')} />
+                                                <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(cat)} title={t('common.edit')} />
+                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(cat)} title={t('common.delete')} />
                                             </div>
                                         </td>
                                     </tr>
@@ -171,31 +171,31 @@ export default function CategoriesAdmin() {
                 </div>
             </Card>
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('admin.categories.editCategory') : t('admin.categories.newCategory')}>
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('categories.editCategory') : t('categories.newCategory')}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <FormError message={formError} />
 
                     <Input
-                        label={t('admin.categories.nameAr')}
+                        label={t('categories.nameAr')}
                         required
                         value={form.name_ar}
                         onChange={(e) => setForm({ ...form, name_ar: e.target.value })}
                         dir="rtl"
                     />
                     <Input
-                        label={t('admin.categories.nameEn')}
+                        label={t('categories.nameEn')}
                         required
                         value={form.name_en}
                         onChange={(e) => setForm({ ...form, name_en: e.target.value })}
                     />
                     <Textarea
-                        label={t('admin.categories.description')}
+                        label={t('categories.description')}
                         value={form.description}
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
                         rows={3}
                     />
                     <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('admin.common.image')}</label>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('common.image')}</label>
                         <input
                             type="file"
                             accept="image/*"
@@ -209,23 +209,23 @@ export default function CategoriesAdmin() {
                         {imagePreview && <img src={imagePreview} alt="preview" className="mt-2.5 w-16 h-16 rounded-lg object-cover border border-slate-200" />}
                     </div>
                     <div className="flex items-center gap-6 pt-1">
-                        <Toggle label={t('admin.common.active')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
-                        <Toggle label={t('admin.categories.featuredOnHome')} checked={form.featured} onChange={(v) => setForm({ ...form, featured: v })} />
+                        <Toggle label={t('common.active')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+                        <Toggle label={t('categories.featuredOnHome')} checked={form.featured} onChange={(v) => setForm({ ...form, featured: v })} />
                     </div>
                     <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
                         <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
-                            {t('admin.common.cancel')}
+                            {t('common.cancel')}
                         </Button>
                         <Button type="submit" disabled={saving}>
-                            {saving ? t('admin.common.saving') : t('admin.categories.saveCategory')}
+                            {saving ? t('common.saving') : t('categories.saveCategory')}
                         </Button>
                     </div>
                 </form>
             </Modal>
 
-            <Modal open={!!blockingInfo} onClose={() => setBlockingInfo(null)} title={t('admin.common.cannotDelete')}>
+            <Modal open={!!blockingInfo} onClose={() => setBlockingInfo(null)} title={t('common.cannotDelete')}>
                 <p className="text-sm text-slate-500 mb-3">
-                    "{blockingInfo?.category?.name}" {t('admin.common.stillHasProducts')}
+                    "{blockingInfo?.category?.name}" {t('common.stillHasProducts')}
                 </p>
                 <ul className="text-sm space-y-1.5">
                     {blockingInfo?.products?.map((p) => (

@@ -3,12 +3,12 @@ import adminApi from '../api/adminApi';
 import Modal from '../components/Modal';
 import { Pencil, Trash2, Plus, Star, Tags, ImageOff } from 'lucide-react';
 import { Card, PageHeader, Button, IconButton, Badge, Input, Textarea, Toggle, EmptyState, TableSkeletonRow, FormError } from '../components/ui';
-import { useLanguage } from '../../context/LanguageContext';
+import { useAdminLanguage } from '../context/AdminLanguageContext';
 
 const emptyForm = { name: '', description: '', status: true, featured: false, logo: null };
 
 export default function BrandsAdmin() {
-    const { t } = useLanguage();
+    const { t } = useAdminLanguage();
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -27,7 +27,7 @@ export default function BrandsAdmin() {
         adminApi
             .get('/brands')
             .then((res) => setBrands(res.data?.data || []))
-            .catch(() => setError(t('admin.brands.failedLoad')))
+            .catch(() => setError(t('brands.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -77,14 +77,14 @@ export default function BrandsAdmin() {
             load();
         } catch (err) {
             const errors = err.response?.data?.errors;
-            setFormError(errors ? Object.values(errors).flat().join(' ') : t('admin.common.somethingWrong'));
+            setFormError(errors ? Object.values(errors).flat().join(' ') : t('common.somethingWrong'));
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (brand) => {
-        if (!window.confirm(`${t('admin.brands.deleteConfirm')} "${brand.name}"?`)) return;
+        if (!window.confirm(`${t('brands.deleteConfirm')} "${brand.name}"?`)) return;
         try {
             await adminApi.delete(`/brands/${brand.id}`);
             load();
@@ -92,7 +92,7 @@ export default function BrandsAdmin() {
             if (err.response?.status === 409) {
                 setBlockingInfo({ brand, products: err.response.data?.blocking_products || [] });
             } else {
-                alert(t('admin.brands.failedDelete'));
+                alert(t('brands.failedDelete'));
             }
         }
     };
@@ -100,11 +100,11 @@ export default function BrandsAdmin() {
     return (
         <div>
             <PageHeader
-                title={t('admin.brands.title')}
-                subtitle={t('admin.brands.subtitle')}
+                title={t('brands.title')}
+                subtitle={t('brands.subtitle')}
                 actions={
                     <Button onClick={openCreate} icon={Plus}>
-                        {t('admin.brands.newBrand')}
+                        {t('brands.newBrand')}
                     </Button>
                 }
             />
@@ -116,11 +116,11 @@ export default function BrandsAdmin() {
                     <table className="w-full text-sm">
                         <thead className="text-left border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.brands.logo')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.name')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.status')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.categories.featured')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('admin.common.actions')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('brands.logo')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('common.name')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('common.status')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('categories.featured')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -129,7 +129,7 @@ export default function BrandsAdmin() {
                             ) : brands.length === 0 ? (
                                 <tr>
                                     <td colSpan={5}>
-                                        <EmptyState icon={Tags} title={t('admin.brands.noBrands')} subtitle={t('admin.brands.createFirst')} />
+                                        <EmptyState icon={Tags} title={t('brands.noBrands')} subtitle={t('brands.createFirst')} />
                                     </td>
                                 </tr>
                             ) : (
@@ -146,7 +146,7 @@ export default function BrandsAdmin() {
                                         </td>
                                         <td className="px-6 py-3 font-semibold text-slate-800">{brand.name}</td>
                                         <td className="px-6 py-3">
-                                            <Badge tone={brand.status ? 'emerald' : 'slate'}>{brand.status ? t('admin.common.active') : t('admin.common.inactive')}</Badge>
+                                            <Badge tone={brand.status ? 'emerald' : 'slate'}>{brand.status ? t('common.active') : t('common.inactive')}</Badge>
                                         </td>
                                         <td className="px-6 py-3">
                                             {brand.featured ? (
@@ -157,8 +157,8 @@ export default function BrandsAdmin() {
                                         </td>
                                         <td className="px-6 py-3 text-right">
                                             <div className="flex items-center justify-end gap-1.5">
-                                                <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(brand)} title={t('admin.common.edit')} />
-                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(brand)} title={t('admin.common.delete')} />
+                                                <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(brand)} title={t('common.edit')} />
+                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(brand)} title={t('common.delete')} />
                                             </div>
                                         </td>
                                     </tr>
@@ -169,19 +169,19 @@ export default function BrandsAdmin() {
                 </div>
             </Card>
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('admin.brands.editBrand') : t('admin.brands.newBrand')}>
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('brands.editBrand') : t('brands.newBrand')}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <FormError message={formError} />
 
-                    <Input label={t('admin.brands.name')} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                    <Input label={t('brands.name')} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
                     <Textarea
-                        label={t('admin.brands.description')}
+                        label={t('brands.description')}
                         value={form.description}
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
                         rows={3}
                     />
                     <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('admin.brands.logo')}</label>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('brands.logo')}</label>
                         <input
                             type="file"
                             accept="image/*"
@@ -195,23 +195,23 @@ export default function BrandsAdmin() {
                         {logoPreview && <img src={logoPreview} alt="preview" className="mt-2.5 w-16 h-16 rounded-lg object-cover border border-slate-200" />}
                     </div>
                     <div className="flex items-center gap-6 pt-1">
-                        <Toggle label={t('admin.common.active')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
-                        <Toggle label={t('admin.brands.featuredOnHome')} checked={form.featured} onChange={(v) => setForm({ ...form, featured: v })} />
+                        <Toggle label={t('common.active')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+                        <Toggle label={t('brands.featuredOnHome')} checked={form.featured} onChange={(v) => setForm({ ...form, featured: v })} />
                     </div>
                     <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
                         <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
-                            {t('admin.common.cancel')}
+                            {t('common.cancel')}
                         </Button>
                         <Button type="submit" disabled={saving}>
-                            {saving ? t('admin.common.saving') : t('admin.brands.saveBrand')}
+                            {saving ? t('common.saving') : t('brands.saveBrand')}
                         </Button>
                     </div>
                 </form>
             </Modal>
 
-            <Modal open={!!blockingInfo} onClose={() => setBlockingInfo(null)} title={t('admin.brands.cannotDelete')}>
+            <Modal open={!!blockingInfo} onClose={() => setBlockingInfo(null)} title={t('brands.cannotDelete')}>
                 <p className="text-sm text-slate-500 mb-3">
-                    "{blockingInfo?.brand?.name}" {t('admin.common.stillHasProducts')}
+                    "{blockingInfo?.brand?.name}" {t('common.stillHasProducts')}
                 </p>
                 <ul className="text-sm space-y-1.5">
                     {blockingInfo?.products?.map((p) => (

@@ -4,7 +4,7 @@ import Modal from '../components/Modal';
 import ProductCard from '../../components/ProductCard';
 import { Eye, Trash2, RotateCcw, XCircle, ShoppingCart, Trash } from 'lucide-react';
 import { Card, PageHeader, IconButton, Badge, Tabs, EmptyState, TableSkeletonRow, Pagination, Select } from '../components/ui';
-import { useLanguage } from '../../context/LanguageContext';
+import { useAdminLanguage } from '../context/AdminLanguageContext';
 import { formatCurrency } from '../../utils/currency';
 
 const STATUSES = ['pending', 'confirmed', 'processing', 'completed', 'cancelled'];
@@ -18,7 +18,7 @@ const statusTone = {
 };
 
 export default function OrdersAdmin() {
-    const { t } = useLanguage();
+    const { t } = useAdminLanguage();
     const [tab, setTab] = useState('active');
     const [orders, setOrders] = useState([]);
     const [meta, setMeta] = useState(null);
@@ -38,7 +38,7 @@ export default function OrdersAdmin() {
                 setOrders(res.data?.data || []);
                 setMeta(res.data?.meta || null);
             })
-            .catch(() => setError(t('admin.orders.failedLoad')))
+            .catch(() => setError(t('orders.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -52,48 +52,48 @@ export default function OrdersAdmin() {
             setOrders((prev) => prev.map((o) => (o.id === order.id ? updated : o)));
             if (viewing?.id === order.id) setViewing(updated);
         } catch {
-            alert(t('admin.orders.failedUpdateStatus'));
+            alert(t('orders.failedUpdateStatus'));
         } finally {
             setUpdatingStatus(false);
         }
     };
 
     const handleDelete = async (order) => {
-        if (!window.confirm(`${t('admin.orders.deleteConfirm')} "${order.order_number}" ${t('admin.orders.deleteConfirmSuffix')}`)) return;
+        if (!window.confirm(`${t('orders.deleteConfirm')} "${order.order_number}" ${t('orders.deleteConfirmSuffix')}`)) return;
         try {
             await adminApi.delete(`/orders/${order.id}`);
             setViewing(null);
             load();
         } catch {
-            alert(t('admin.orders.failedDelete'));
+            alert(t('orders.failedDelete'));
         }
     };
 
     const handleRestore = async (order) => {
-        if (!window.confirm(`${t('admin.orders.restoreConfirm')} "${order.order_number}"?`)) return;
+        if (!window.confirm(`${t('orders.restoreConfirm')} "${order.order_number}"?`)) return;
         try {
             await adminApi.post(`/orders/${order.id}/restore`);
             setViewing(null);
             load();
         } catch {
-            alert(t('admin.orders.failedRestore'));
+            alert(t('orders.failedRestore'));
         }
     };
 
     const handleForceDelete = async (order) => {
-        if (!window.confirm(`${t('admin.orders.permanentDeleteConfirm')} "${order.order_number}"? ${t('admin.orders.permanentDeleteWarning')}`)) return;
+        if (!window.confirm(`${t('orders.permanentDeleteConfirm')} "${order.order_number}"? ${t('orders.permanentDeleteWarning')}`)) return;
         try {
             await adminApi.delete(`/orders/${order.id}/force`);
             setViewing(null);
             load();
         } catch {
-            alert(t('admin.orders.failedPermanentDelete'));
+            alert(t('orders.failedPermanentDelete'));
         }
     };
 
     return (
         <div>
-            <PageHeader title={t('admin.orders.title')} subtitle={t('admin.orders.subtitle')} />
+            <PageHeader title={t('orders.title')} subtitle={t('orders.subtitle')} />
 
             <div className="flex items-center justify-between mb-4">
                 <Tabs
@@ -103,8 +103,8 @@ export default function OrdersAdmin() {
                         setPage(1);
                     }}
                     options={[
-                        { value: 'active', label: t('admin.orders.tabActive') },
-                        { value: 'trashed', label: t('admin.orders.tabTrashed') },
+                        { value: 'active', label: t('orders.tabActive') },
+                        { value: 'trashed', label: t('orders.tabTrashed') },
                     ]}
                 />
             </div>
@@ -120,12 +120,12 @@ export default function OrdersAdmin() {
                     <table className="w-full text-sm">
                         <thead className="text-left border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.orders.orderNumber')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.orders.customer')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.orders.total')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.orders.status')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.orders.date')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('admin.common.actions')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('orders.orderNumber')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('orders.customer')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('orders.total')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('orders.status')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('orders.date')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -136,8 +136,8 @@ export default function OrdersAdmin() {
                                     <td colSpan={6}>
                                         <EmptyState
                                             icon={tab === 'trashed' ? Trash : ShoppingCart}
-                                            title={tab === 'trashed' ? t('admin.orders.trashEmpty') : t('admin.orders.noOrders')}
-                                            subtitle={tab === 'trashed' ? t('admin.orders.trashHint') : t('admin.orders.newOrdersHint')}
+                                            title={tab === 'trashed' ? t('orders.trashEmpty') : t('orders.noOrders')}
+                                            subtitle={tab === 'trashed' ? t('orders.trashHint') : t('orders.newOrdersHint')}
                                         />
                                     </td>
                                 </tr>
@@ -155,13 +155,13 @@ export default function OrdersAdmin() {
                                         </td>
                                         <td className="px-6 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-1.5">
-                                                <IconButton icon={Eye} tone="primary" onClick={() => setViewing(o)} title={t('admin.common.view')} />
+                                                <IconButton icon={Eye} tone="primary" onClick={() => setViewing(o)} title={t('common.view')} />
                                                 {tab === 'active' ? (
-                                                    <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(o)} title={t('admin.common.delete')} />
+                                                    <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(o)} title={t('common.delete')} />
                                                 ) : (
                                                     <>
-                                                        <IconButton icon={RotateCcw} tone="success" onClick={() => handleRestore(o)} title={t('admin.common.restore')} />
-                                                        <IconButton icon={XCircle} tone="danger" onClick={() => handleForceDelete(o)} title={t('admin.common.permanentlyDelete')} />
+                                                        <IconButton icon={RotateCcw} tone="success" onClick={() => handleRestore(o)} title={t('common.restore')} />
+                                                        <IconButton icon={XCircle} tone="danger" onClick={() => handleForceDelete(o)} title={t('common.permanentlyDelete')} />
                                                     </>
                                                 )}
                                             </div>
@@ -175,30 +175,30 @@ export default function OrdersAdmin() {
                 <Pagination meta={meta} page={page} onPageChange={setPage} />
             </Card>
 
-            <Modal open={!!viewing} onClose={() => setViewing(null)} title={viewing?.order_number} subtitle={t('admin.orders.orderDetails')} wide>
+            <Modal open={!!viewing} onClose={() => setViewing(null)} title={viewing?.order_number} subtitle={t('orders.orderDetails')} wide>
                 {viewing && (
                     <div className="space-y-5 text-sm">
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             <div className="rounded-xl bg-slate-50 px-3.5 py-2.5">
-                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('admin.orders.customer')}</span>
+                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('orders.customer')}</span>
                                 <span className="text-slate-800 font-medium">{viewing.customer_name}</span>
                             </div>
                             <div className="rounded-xl bg-slate-50 px-3.5 py-2.5">
-                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('admin.orders.phone')}</span>
+                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('orders.phone')}</span>
                                 <span className="text-slate-800 font-medium">{viewing.customer_phone}</span>
                             </div>
                             <div className="rounded-xl bg-slate-50 px-3.5 py-2.5">
-                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('admin.orders.email')}</span>
+                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('orders.email')}</span>
                                 <span className="text-slate-800 font-medium">{viewing.customer_email || '—'}</span>
                             </div>
                             <div className="rounded-xl bg-slate-50 px-3.5 py-2.5 col-span-2 sm:col-span-3">
-                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('admin.orders.address')}</span>
+                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('orders.address')}</span>
                                 <span className="text-slate-800 font-medium">{viewing.customer_address || '—'}</span>
                             </div>
                         </div>
 
                         <div>
-                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide block mb-2.5">{t('admin.orders.items')}</span>
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide block mb-2.5">{t('orders.items')}</span>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 {(viewing.items || []).map((item) => {
                                     const hasItemDiscount = Number(item.discount_percent) > 0;
@@ -219,7 +219,7 @@ export default function OrdersAdmin() {
 
                                             <div className="mt-3 pt-3 border-t border-slate-200 space-y-1.5 text-xs">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-slate-500">{t('admin.orders.priceBeforeDiscount')}</span>
+                                                    <span className="text-slate-500">{t('orders.priceBeforeDiscount')}</span>
                                                     <span className={`font-medium text-slate-900 ${hasItemDiscount ? 'line-through text-slate-400' : ''}`}>
                                                         {formatCurrency(item.original_price)}
                                                     </span>
@@ -227,26 +227,26 @@ export default function OrdersAdmin() {
 
                                                 {hasItemDiscount && (
                                                     <div className="flex items-center justify-between">
-                                                        <span className="text-slate-500">{t('admin.orders.priceAfterDiscount')} ({item.discount_percent}% {t('admin.orders.off')})</span>
+                                                        <span className="text-slate-500">{t('orders.priceAfterDiscount')} ({item.discount_percent}% {t('orders.off')})</span>
                                                         <span className="font-medium text-emerald-600">{formatCurrency(item.price)}</span>
                                                     </div>
                                                 )}
 
                                                 {item.color && (
                                                     <div className="flex items-center justify-between">
-                                                        <span className="text-slate-500">{t('admin.orders.color')}</span>
+                                                        <span className="text-slate-500">{t('orders.color')}</span>
                                                         <span className="font-medium text-slate-900">{item.color}</span>
                                                     </div>
                                                 )}
 
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-slate-500">{t('admin.orders.quantity')}</span>
+                                                    <span className="text-slate-500">{t('orders.quantity')}</span>
                                                     <span className="font-medium text-slate-900">{item.quantity}</span>
                                                 </div>
 
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-slate-500">
-                                                        {t('admin.orders.subtotal')} {hasItemDiscount ? t('admin.orders.subtotalBeforeDiscount') : ''}
+                                                        {t('orders.subtotal')} {hasItemDiscount ? t('orders.subtotalBeforeDiscount') : ''}
                                                     </span>
                                                     <span className={`font-medium text-slate-900 ${hasItemDiscount ? 'line-through text-slate-400' : ''}`}>
                                                         {formatCurrency(subtotalBeforeDiscount)}
@@ -254,7 +254,7 @@ export default function OrdersAdmin() {
                                                 </div>
 
                                                 <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-slate-200">
-                                                    <span className="text-slate-700 font-semibold">{t('admin.orders.totalAfterDiscount')}</span>
+                                                    <span className="text-slate-700 font-semibold">{t('orders.totalAfterDiscount')}</span>
                                                     <span className="font-bold text-slate-900">{formatCurrency(item.subtotal)}</span>
                                                 </div>
                                             </div>
@@ -266,22 +266,22 @@ export default function OrdersAdmin() {
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-right border-t border-slate-100 pt-4">
                             <div>
-                                <span className="text-slate-400 block text-xs font-semibold">{t('admin.orders.originalPrice')}</span>
+                                <span className="text-slate-400 block text-xs font-semibold">{t('orders.originalPrice')}</span>
                                 <span className="font-semibold text-slate-800">{formatCurrency(viewing.subtotal_price)}</span>
                             </div>
                             <div>
-                                <span className="text-slate-400 block text-xs font-semibold">{t('admin.orders.discount')}</span>
+                                <span className="text-slate-400 block text-xs font-semibold">{t('orders.discount')}</span>
                                 <span className="font-semibold text-slate-800">-{formatCurrency(viewing.discount_amount)}</span>
                                 {viewing.first_order_discount_applied && (
-                                    <div className="text-[11px] text-emerald-600 font-medium">{t('admin.orders.includesFirstOrder')}</div>
+                                    <div className="text-[11px] text-emerald-600 font-medium">{t('orders.includesFirstOrder')}</div>
                                 )}
                             </div>
                             <div>
-                                <span className="text-slate-400 block text-xs font-semibold">{t('admin.orders.delivery')}</span>
+                                <span className="text-slate-400 block text-xs font-semibold">{t('orders.delivery')}</span>
                                 <span className="font-semibold text-slate-800">+{formatCurrency(viewing.delivery_fee ?? 0)}</span>
                             </div>
                             <div>
-                                <span className="text-slate-400 block text-xs font-semibold">{t('admin.orders.totalAfterDiscount')}</span>
+                                <span className="text-slate-400 block text-xs font-semibold">{t('orders.totalAfterDiscount')}</span>
                                 <span className="font-bold text-slate-900">{formatCurrency(viewing.total_price)}</span>
                             </div>
                         </div>
@@ -290,9 +290,9 @@ export default function OrdersAdmin() {
                             <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100">
                                 <div>
                                     <span className="text-rose-500 text-xs font-semibold block">
-                                        {t('admin.orders.deletedOn')} {new Date(viewing.deleted_at).toLocaleString()}
+                                        {t('orders.deletedOn')} {new Date(viewing.deleted_at).toLocaleString()}
                                     </span>
-                                    <span className="text-slate-400 text-xs">{t('admin.orders.inRecycleBin')}</span>
+                                    <span className="text-slate-400 text-xs">{t('orders.inRecycleBin')}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
@@ -300,21 +300,21 @@ export default function OrdersAdmin() {
                                         type="button"
                                         className="inline-flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 text-sm font-semibold"
                                     >
-                                        <RotateCcw size={15} /> {t('admin.common.restore')}
+                                        <RotateCcw size={15} /> {t('common.restore')}
                                     </button>
                                     <button
                                         onClick={() => handleForceDelete(viewing)}
                                         type="button"
                                         className="inline-flex items-center gap-1.5 text-rose-500 hover:text-rose-600 text-sm font-semibold"
                                     >
-                                        <XCircle size={15} /> {t('admin.orders.deletePermanently')}
+                                        <XCircle size={15} /> {t('orders.deletePermanently')}
                                     </button>
                                 </div>
                             </div>
                         ) : (
                             <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100">
                                 <div className="flex items-center gap-3">
-                                    <span className="text-slate-400 text-xs font-semibold">{t('admin.orders.status')}</span>
+                                    <span className="text-slate-400 text-xs font-semibold">{t('orders.status')}</span>
                                     <Select
                                         value={viewing.status}
                                         disabled={updatingStatus}
@@ -333,7 +333,7 @@ export default function OrdersAdmin() {
                                     type="button"
                                     className="inline-flex items-center gap-1.5 text-rose-500 hover:text-rose-600 text-sm font-semibold"
                                 >
-                                    <Trash2 size={15} /> {t('admin.orders.deleteAction')}
+                                    <Trash2 size={15} /> {t('orders.deleteAction')}
                                 </button>
                             </div>
                         )}

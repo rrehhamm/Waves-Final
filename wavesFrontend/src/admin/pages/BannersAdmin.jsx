@@ -3,12 +3,12 @@ import adminApi from '../api/adminApi';
 import Modal from '../components/Modal';
 import { Pencil, Trash2, Plus, ToggleLeft, ToggleRight, ImageIcon } from 'lucide-react';
 import { Card, PageHeader, Button, IconButton, Badge, Input, Textarea, Toggle, EmptyState, FormError } from '../components/ui';
-import { useLanguage } from '../../context/LanguageContext';
+import { useAdminLanguage } from '../context/AdminLanguageContext';
 
 const emptyForm = { title: '', tag: '', description: '', status: true, image: null };
 
 export default function BannersAdmin() {
-    const { t } = useLanguage();
+    const { t } = useAdminLanguage();
     const [banners, setBanners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -25,7 +25,7 @@ export default function BannersAdmin() {
         adminApi
             .get('/banners')
             .then((res) => setBanners(res.data?.data || []))
-            .catch(() => setError(t('admin.banners.failedLoad')))
+            .catch(() => setError(t('banners.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -75,19 +75,19 @@ export default function BannersAdmin() {
             load();
         } catch (err) {
             const errors = err.response?.data?.errors;
-            setFormError(errors ? Object.values(errors).flat().join(' ') : t('admin.common.somethingWrong'));
+            setFormError(errors ? Object.values(errors).flat().join(' ') : t('common.somethingWrong'));
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (banner) => {
-        if (!window.confirm(`${t('admin.banners.deleteConfirm')} "${banner.title}"?`)) return;
+        if (!window.confirm(`${t('banners.deleteConfirm')} "${banner.title}"?`)) return;
         try {
             await adminApi.delete(`/banners/${banner.id}`);
             load();
         } catch {
-            alert(t('admin.banners.failedDelete'));
+            alert(t('banners.failedDelete'));
         }
     };
 
@@ -96,18 +96,18 @@ export default function BannersAdmin() {
             await adminApi.patch(`/banners/${banner.id}/toggle-status`);
             load();
         } catch {
-            alert(t('admin.banners.failedToggle'));
+            alert(t('banners.failedToggle'));
         }
     };
 
     return (
         <div>
             <PageHeader
-                title={t('admin.banners.title')}
-                subtitle={t('admin.banners.subtitle')}
+                title={t('banners.title')}
+                subtitle={t('banners.subtitle')}
                 actions={
                     <Button onClick={openCreate} icon={Plus}>
-                        {t('admin.banners.newBanner')}
+                        {t('banners.newBanner')}
                     </Button>
                 }
             />
@@ -122,7 +122,7 @@ export default function BannersAdmin() {
                 </div>
             ) : banners.length === 0 ? (
                 <Card>
-                    <EmptyState icon={ImageIcon} title={t('admin.banners.noBanners')} subtitle={t('admin.banners.addFirst')} />
+                    <EmptyState icon={ImageIcon} title={t('banners.noBanners')} subtitle={t('banners.addFirst')} />
                 </Card>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -138,7 +138,7 @@ export default function BannersAdmin() {
                                 )}
                                 <div className="absolute top-2.5 right-2.5">
                                     <Badge tone={b.status ? 'emerald' : 'slate'} className="shadow-sm">
-                                        {b.status ? t('admin.common.active') : t('admin.common.inactive')}
+                                        {b.status ? t('common.active') : t('common.inactive')}
                                     </Badge>
                                 </div>
                             </div>
@@ -155,10 +155,10 @@ export default function BannersAdmin() {
                                         icon={b.status ? ToggleRight : ToggleLeft}
                                         tone={b.status ? 'success' : 'default'}
                                         onClick={() => handleToggle(b)}
-                                        title={t('admin.banners.toggleActive')}
+                                        title={t('banners.toggleActive')}
                                     />
-                                    <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(b)} title={t('admin.common.edit')} />
-                                    <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(b)} title={t('admin.common.delete')} className="ml-auto" />
+                                    <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(b)} title={t('common.edit')} />
+                                    <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(b)} title={t('common.delete')} className="ml-auto" />
                                 </div>
                             </div>
                         </Card>
@@ -166,25 +166,25 @@ export default function BannersAdmin() {
                 </div>
             )}
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('admin.banners.editBanner') : t('admin.banners.newBanner')}>
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('banners.editBanner') : t('banners.newBanner')}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <FormError message={formError} />
 
                     <Input
-                        label={t('admin.banners.tag')}
+                        label={t('banners.tag')}
                         value={form.tag}
                         onChange={(e) => setForm({ ...form, tag: e.target.value })}
-                        placeholder={t('admin.banners.tagPlaceholder')}
+                        placeholder={t('banners.tagPlaceholder')}
                     />
                     <Input
-                        label={t('admin.banners.titleField')}
+                        label={t('banners.titleField')}
                         required
                         value={form.title}
                         onChange={(e) => setForm({ ...form, title: e.target.value })}
                         placeholder="e.g. New Summer Arrivals"
                     />
                     <Textarea
-                        label={t('admin.banners.highlightText')}
+                        label={t('banners.highlightText')}
                         value={form.description}
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
                         rows={2}
@@ -192,7 +192,7 @@ export default function BannersAdmin() {
                     />
                     <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                            {t('admin.common.image')} {editing ? t('admin.common.keepCurrentImage') : ''}
+                            {t('common.image')} {editing ? t('common.keepCurrentImage') : ''}
                         </label>
                         <input
                             type="file"
@@ -206,13 +206,13 @@ export default function BannersAdmin() {
                         />
                         {preview && <img src={preview} alt="preview" className="mt-2.5 w-28 h-16 rounded-lg object-cover border border-slate-200" />}
                     </div>
-                    <Toggle label={t('admin.common.active')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+                    <Toggle label={t('common.active')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
                     <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
                         <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
-                            {t('admin.common.cancel')}
+                            {t('common.cancel')}
                         </Button>
                         <Button type="submit" disabled={saving}>
-                            {saving ? t('admin.common.saving') : t('admin.banners.saveBanner')}
+                            {saving ? t('common.saving') : t('banners.saveBanner')}
                         </Button>
                     </div>
                 </form>

@@ -3,10 +3,10 @@ import adminApi from '../api/adminApi';
 import Modal from '../components/Modal';
 import { Eye, Trash2, Mail, MailOpen, Phone } from 'lucide-react';
 import { Card, PageHeader, IconButton, EmptyState, TableSkeletonRow, FormError } from '../components/ui';
-import { useLanguage } from '../../context/LanguageContext';
+import { useAdminLanguage } from '../context/AdminLanguageContext';
 
 export default function ContactMessagesAdmin() {
-    const { t } = useLanguage();
+    const { t } = useAdminLanguage();
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -17,7 +17,7 @@ export default function ContactMessagesAdmin() {
         adminApi
             .get('/contact-messages')
             .then((res) => setMessages(res.data?.data || []))
-            .catch(() => setError(t('admin.messages.failedLoad')))
+            .catch(() => setError(t('messages.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -35,13 +35,13 @@ export default function ContactMessagesAdmin() {
     };
 
     const handleDelete = async (msg) => {
-        if (!window.confirm(`${t('admin.messages.deleteConfirm')} "${msg.name}"?`)) return;
+        if (!window.confirm(`${t('messages.deleteConfirm')} "${msg.name}"?`)) return;
         try {
             await adminApi.delete(`/contact-messages/${msg.id}`);
             if (viewing?.id === msg.id) setViewing(null);
             load();
         } catch {
-            alert(t('admin.messages.failedDelete'));
+            alert(t('messages.failedDelete'));
         }
     };
 
@@ -50,8 +50,8 @@ export default function ContactMessagesAdmin() {
     return (
         <div>
             <PageHeader
-                title={t('admin.messages.title')}
-                subtitle={unreadCount > 0 ? t(unreadCount === 1 ? 'admin.messages.unreadCount' : 'admin.messages.unreadCountPlural', { count: unreadCount }) : t('admin.messages.allRead')}
+                title={t('messages.title')}
+                subtitle={unreadCount > 0 ? t(unreadCount === 1 ? 'messages.unreadCount' : 'messages.unreadCountPlural', { count: unreadCount }) : t('messages.allRead')}
             />
 
             {error && <div className="mb-4"><FormError message={error} /></div>}
@@ -62,11 +62,11 @@ export default function ContactMessagesAdmin() {
                         <thead className="text-left border-b border-slate-100">
                             <tr>
                                 <th className="px-6 py-3.5 w-10"></th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.messages.name')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.messages.contact')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.messages.message')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.messages.received')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('admin.common.actions')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('messages.name')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('messages.contact')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('messages.message')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('messages.received')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -75,7 +75,7 @@ export default function ContactMessagesAdmin() {
                             ) : messages.length === 0 ? (
                                 <tr>
                                     <td colSpan={6}>
-                                        <EmptyState icon={Mail} title={t('admin.messages.noMessages')} subtitle={t('admin.messages.noMessagesHint')} />
+                                        <EmptyState icon={Mail} title={t('messages.noMessages')} subtitle={t('messages.noMessagesHint')} />
                                     </td>
                                 </tr>
                             ) : (
@@ -108,8 +108,8 @@ export default function ContactMessagesAdmin() {
                                         </td>
                                         <td className="px-6 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-1.5">
-                                                <IconButton icon={Eye} tone="primary" onClick={() => openMessage(m)} title={t('admin.common.view')} />
-                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(m)} title={t('admin.common.delete')} />
+                                                <IconButton icon={Eye} tone="primary" onClick={() => openMessage(m)} title={t('common.view')} />
+                                                <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(m)} title={t('common.delete')} />
                                             </div>
                                         </td>
                                     </tr>
@@ -120,25 +120,25 @@ export default function ContactMessagesAdmin() {
                 </div>
             </Card>
 
-            <Modal open={!!viewing} onClose={() => setViewing(null)} title={viewing?.name} subtitle={t('admin.messages.title')}>
+            <Modal open={!!viewing} onClose={() => setViewing(null)} title={viewing?.name} subtitle={t('messages.title')}>
                 {viewing && (
                     <div className="space-y-4 text-sm">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="rounded-xl bg-slate-50 px-3.5 py-2.5">
-                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('admin.messages.email')}</span>
+                                <span className="text-xs text-slate-400 font-semibold block mb-0.5">{t('messages.email')}</span>
                                 <span className="text-slate-800 font-medium">{viewing.email}</span>
                             </div>
                             {viewing.phone && (
                                 <div className="rounded-xl bg-slate-50 px-3.5 py-2.5">
                                     <span className="text-xs text-slate-400 font-semibold block mb-0.5 flex items-center gap-1">
-                                        <Phone size={11} /> {t('admin.messages.phone')}
+                                        <Phone size={11} /> {t('messages.phone')}
                                     </span>
                                     <span className="text-slate-800 font-medium">{viewing.phone}</span>
                                 </div>
                             )}
                         </div>
                         <div className="text-xs text-slate-400">
-                            {t('admin.messages.received')} {viewing.created_at ? new Date(viewing.created_at).toLocaleString() : '—'}
+                            {t('messages.received')} {viewing.created_at ? new Date(viewing.created_at).toLocaleString() : '—'}
                         </div>
                         <div className="pt-3 border-t border-slate-100">
                             <p className="whitespace-pre-wrap text-slate-700 leading-relaxed">{viewing.message}</p>
@@ -149,7 +149,7 @@ export default function ContactMessagesAdmin() {
                                 type="button"
                                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-600 hover:text-rose-700"
                             >
-                                <Trash2 size={15} /> {t('admin.messages.deleteMessage')}
+                                <Trash2 size={15} /> {t('messages.deleteMessage')}
                             </button>
                         </div>
                     </div>

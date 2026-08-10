@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import adminApi from '../api/adminApi';
 import { Card, PageHeader, StatCard, Badge, EmptyState } from '../components/ui';
-import { useLanguage } from '../../context/LanguageContext';
+import { useAdminLanguage } from '../context/AdminLanguageContext';
 import { formatCurrency } from '../../utils/currency';
 import {
     Package,
@@ -50,7 +50,7 @@ function WeeklyActivityChart({ data }) {
 }
 
 export default function Dashboard() {
-    const { t } = useLanguage();
+    const { t } = useAdminLanguage();
     const [stats, setStats] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
@@ -59,23 +59,23 @@ export default function Dashboard() {
         adminApi
             .get('/dashboard')
             .then((res) => setStats(res.data?.data || {}))
-            .catch(() => setError(t('admin.dashboard.failedLoad')))
+            .catch(() => setError(t('dashboard.failedLoad')))
             .finally(() => setLoading(false));
     }, []);
 
     const cards = [
-        { key: 'orders_count', label: t('admin.dashboard.totalOrders'), icon: ShoppingCart, tone: 'indigo' },
-        { key: 'products_count', label: t('admin.dashboard.totalProducts'), icon: Package, tone: 'blue' },
-        { key: 'customers_count', label: t('admin.dashboard.totalCustomers'), icon: Users, tone: 'violet' },
+        { key: 'orders_count', label: t('dashboard.totalOrders'), icon: ShoppingCart, tone: 'indigo' },
+        { key: 'products_count', label: t('dashboard.totalProducts'), icon: Package, tone: 'blue' },
+        { key: 'customers_count', label: t('dashboard.totalCustomers'), icon: Users, tone: 'violet' },
         {
             key: 'revenue',
-            label: t('admin.dashboard.revenue'),
+            label: t('dashboard.revenue'),
             icon: DollarSign,
             tone: 'emerald',
             format: (v) => formatCurrency(v || 0),
         },
-        { key: 'pending_orders_count', label: t('admin.dashboard.pendingOrders'), icon: Clock, tone: 'amber' },
-        { key: 'delivered_orders_count', label: t('admin.dashboard.deliveredOrders'), icon: CheckCircle2, tone: 'emerald' },
+        { key: 'pending_orders_count', label: t('dashboard.pendingOrders'), icon: Clock, tone: 'amber' },
+        { key: 'delivered_orders_count', label: t('dashboard.deliveredOrders'), icon: CheckCircle2, tone: 'emerald' },
     ];
 
     const weekly = stats?.weekly_activity || [];
@@ -86,7 +86,7 @@ export default function Dashboard() {
 
     return (
         <div>
-            <PageHeader title={t('admin.dashboard.title')} subtitle={t('admin.dashboard.subtitle')} />
+            <PageHeader title={t('dashboard.title')} subtitle={t('dashboard.subtitle')} />
 
             {error && (
                 <div className="rounded-xl bg-rose-50 border border-rose-100 px-4 py-3 text-sm text-rose-600 font-medium mb-6">
@@ -110,38 +110,38 @@ export default function Dashboard() {
                 <Card className="lg:col-span-2 p-6">
                     <div className="flex items-center justify-between mb-1">
                         <div>
-                            <h3 className="text-sm font-bold text-slate-900">{t('admin.dashboard.weeklyActivity')}</h3>
-                            <p className="text-xs text-slate-400 mt-0.5">{t('admin.dashboard.weeklyActivitySubtitle')}</p>
+                            <h3 className="text-sm font-bold text-slate-900">{t('dashboard.weeklyActivity')}</h3>
+                            <p className="text-xs text-slate-400 mt-0.5">{t('dashboard.weeklyActivitySubtitle')}</p>
                         </div>
                         <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
                             <TrendingUp size={13} />
-                            {weekOrders} {t('admin.dashboard.ordersSuffix')}
+                            {weekOrders} {t('dashboard.ordersSuffix')}
                         </div>
                     </div>
 
                     {loading ? (
-                        <div className="h-44 flex items-center justify-center text-sm text-slate-300">{t('admin.dashboard.loadingChart')}</div>
+                        <div className="h-44 flex items-center justify-center text-sm text-slate-300">{t('dashboard.loadingChart')}</div>
                     ) : weekly.length === 0 ? (
-                        <EmptyState icon={BarChart3} title={t('admin.dashboard.noActivityYet')} subtitle={t('admin.dashboard.activityHint')} />
+                        <EmptyState icon={BarChart3} title={t('dashboard.noActivityYet')} subtitle={t('dashboard.activityHint')} />
                     ) : (
                         <WeeklyActivityChart data={weekly} />
                     )}
 
                     <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100 text-xs text-slate-400">
-                        <span>{t('admin.dashboard.revenueThisWeek')}</span>
+                        <span>{t('dashboard.revenueThisWeek')}</span>
                         <span className="font-bold text-slate-700">{formatCurrency(weekRevenue)}</span>
                     </div>
                 </Card>
 
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold text-slate-900">{t('admin.dashboard.bestSellingProducts')}</h3>
+                        <h3 className="text-sm font-bold text-slate-900">{t('dashboard.bestSellingProducts')}</h3>
                     </div>
 
                     {loading ? (
-                        <div className="h-44 flex items-center justify-center text-sm text-slate-300">{t('admin.common.loading')}</div>
+                        <div className="h-44 flex items-center justify-center text-sm text-slate-300">{t('common.loading')}</div>
                     ) : bestSellers.length === 0 ? (
-                        <EmptyState icon={Package} title={t('admin.dashboard.noSalesYet')} subtitle={t('admin.dashboard.bestSellersHint')} />
+                        <EmptyState icon={Package} title={t('dashboard.noSalesYet')} subtitle={t('dashboard.bestSellersHint')} />
                     ) : (
                         <ul className="space-y-3">
                             {bestSellers.map((p, i) => (
@@ -154,7 +154,7 @@ export default function Dashboard() {
                                     )}
                                     <div className="min-w-0 flex-1">
                                         <p className="text-sm font-semibold text-slate-800 truncate">{p.name}</p>
-                                        <p className="text-xs text-slate-400">{p.total_quantity} {t('admin.dashboard.sold')}</p>
+                                        <p className="text-xs text-slate-400">{p.total_quantity} {t('dashboard.sold')}</p>
                                     </div>
                                     <span className="text-xs font-bold text-slate-600 shrink-0">
                                         {formatCurrency(p.total_revenue)}
@@ -168,29 +168,29 @@ export default function Dashboard() {
 
             <Card className="overflow-hidden">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                    <h3 className="text-sm font-bold text-slate-900">{t('admin.dashboard.recentOrders')}</h3>
+                    <h3 className="text-sm font-bold text-slate-900">{t('dashboard.recentOrders')}</h3>
                     <a
                         href="/admin/orders"
                         className="text-xs font-semibold text-[#4E7699] hover:text-[#3A5A73] flex items-center gap-1"
                     >
-                        {t('admin.dashboard.viewAll')} <ArrowUpRight size={13} />
+                        {t('dashboard.viewAll')} <ArrowUpRight size={13} />
                     </a>
                 </div>
 
                 {loading ? (
-                    <div className="py-10 text-center text-sm text-slate-300">{t('admin.common.loading')}</div>
+                    <div className="py-10 text-center text-sm text-slate-300">{t('common.loading')}</div>
                 ) : recentOrders.length === 0 ? (
-                    <EmptyState icon={ShoppingCart} title={t('admin.dashboard.noOrdersYet')} subtitle={t('admin.dashboard.newOrdersHint')} />
+                    <EmptyState icon={ShoppingCart} title={t('dashboard.noOrdersYet')} subtitle={t('dashboard.newOrdersHint')} />
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead className="text-slate-400 text-left">
                                 <tr>
-                                    <th className="px-6 py-2.5 font-semibold text-xs uppercase tracking-wide">{t('admin.dashboard.order')}</th>
-                                    <th className="px-6 py-2.5 font-semibold text-xs uppercase tracking-wide">{t('admin.dashboard.customer')}</th>
-                                    <th className="px-6 py-2.5 font-semibold text-xs uppercase tracking-wide">{t('admin.common.total')}</th>
-                                    <th className="px-6 py-2.5 font-semibold text-xs uppercase tracking-wide">{t('admin.common.status')}</th>
-                                    <th className="px-6 py-2.5 font-semibold text-xs uppercase tracking-wide">{t('admin.common.date')}</th>
+                                    <th className="px-6 py-2.5 font-semibold text-xs uppercase tracking-wide">{t('dashboard.order')}</th>
+                                    <th className="px-6 py-2.5 font-semibold text-xs uppercase tracking-wide">{t('dashboard.customer')}</th>
+                                    <th className="px-6 py-2.5 font-semibold text-xs uppercase tracking-wide">{t('common.total')}</th>
+                                    <th className="px-6 py-2.5 font-semibold text-xs uppercase tracking-wide">{t('common.status')}</th>
+                                    <th className="px-6 py-2.5 font-semibold text-xs uppercase tracking-wide">{t('common.date')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">

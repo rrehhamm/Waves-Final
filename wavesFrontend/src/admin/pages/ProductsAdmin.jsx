@@ -3,7 +3,7 @@ import adminApi from '../api/adminApi';
 import fetchAll from '../utils/fetchAll';
 import Modal from '../components/Modal';
 import { Pencil, Trash2, Plus, Star, RotateCcw, XCircle, ArrowRightLeft, Package, ImageOff } from 'lucide-react';
-import { useLanguage } from '../../context/LanguageContext';
+import { useAdminLanguage } from '../context/AdminLanguageContext';
 import { formatCurrency } from '../../utils/currency';
 import {
     Card,
@@ -42,7 +42,7 @@ const emptyForm = {
 };
 
 export default function ProductsAdmin() {
-    const { t } = useLanguage();
+    const { t } = useAdminLanguage();
     const [tab, setTab] = useState('active');
     const [products, setProducts] = useState([]);
     const [meta, setMeta] = useState(null);
@@ -68,8 +68,8 @@ export default function ProductsAdmin() {
     const [reassignForm, setReassignForm] = useState({ category_id: '', brand_id: '' });
 
     useEffect(() => {
-        fetchAll('/categories').then(setCategories).catch(() => {});
-        fetchAll('/brands').then(setBrands).catch(() => {});
+        fetchAll('/categories').then(setCategories).catch(() => { });
+        fetchAll('/brands').then(setBrands).catch(() => { });
     }, []);
 
     const load = () => {
@@ -84,7 +84,7 @@ export default function ProductsAdmin() {
                 setProducts(res.data?.data || []);
                 setMeta(res.data?.meta || null);
             })
-            .catch(() => setError(t('admin.products.failedLoad')))
+            .catch(() => setError(t('products.failedLoad')))
             .finally(() => setLoading(false));
     };
 
@@ -199,19 +199,19 @@ export default function ProductsAdmin() {
             load();
         } catch (err) {
             const errors = err.response?.data?.errors;
-            setFormError(errors ? Object.values(errors).flat().join(' ') : t('admin.common.somethingWrong'));
+            setFormError(errors ? Object.values(errors).flat().join(' ') : t('common.somethingWrong'));
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (product) => {
-        if (!window.confirm(`${t('admin.products.deleteConfirm')} "${product.name}"? ${t('admin.products.deleteSoftHint')}`)) return;
+        if (!window.confirm(`${t('products.deleteConfirm')} "${product.name}"? ${t('products.deleteSoftHint')}`)) return;
         try {
             await adminApi.delete(`/products/${product.id}`);
             load();
         } catch {
-            alert(t('admin.products.failedDelete'));
+            alert(t('products.failedDelete'));
         }
     };
 
@@ -220,17 +220,17 @@ export default function ProductsAdmin() {
             await adminApi.post(`/products/${product.id}/restore`);
             load();
         } catch {
-            alert(t('admin.products.failedRestore'));
+            alert(t('products.failedRestore'));
         }
     };
 
     const handleForceDelete = async (product) => {
-        if (!window.confirm(`${t('admin.products.permanentDeleteConfirm')} "${product.name}"? ${t('admin.products.permanentDeleteWarning')}`)) return;
+        if (!window.confirm(`${t('products.permanentDeleteConfirm')} "${product.name}"? ${t('products.permanentDeleteWarning')}`)) return;
         try {
             await adminApi.delete(`/products/${product.id}/force`);
             load();
         } catch {
-            alert(t('admin.products.failedPermanentDelete'));
+            alert(t('products.failedPermanentDelete'));
         }
     };
 
@@ -246,18 +246,18 @@ export default function ProductsAdmin() {
             setReassignTarget(null);
             load();
         } catch {
-            alert(t('admin.products.failedReassign'));
+            alert(t('products.failedReassign'));
         }
     };
 
     return (
         <div>
             <PageHeader
-                title={t('admin.products.title')}
-                subtitle={t('admin.products.subtitle')}
+                title={t('products.title')}
+                subtitle={t('products.subtitle')}
                 actions={
                     <Button onClick={openCreate} icon={Plus}>
-                        {t('admin.products.newProduct')}
+                        {t('products.newProduct')}
                     </Button>
                 }
             />
@@ -270,16 +270,16 @@ export default function ProductsAdmin() {
                         setPage(1);
                     }}
                     options={[
-                        { value: 'active', label: t('admin.products.tabActive') },
-                        { value: 'trashed', label: t('admin.products.tabTrashed') },
+                        { value: 'active', label: t('products.tabActive') },
+                        { value: 'trashed', label: t('products.tabTrashed') },
                     ]}
                 />
 
                 {tab === 'active' && (
                     <form onSubmit={handleSearchSubmit} className="sm:ml-auto flex gap-2">
-                        <SearchBox value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin.products.searchPlaceholder')} className="w-64" />
+                        <SearchBox value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('products.searchPlaceholder')} className="w-64" />
                         <Button type="submit" variant="secondary">
-                            {t('admin.products.search')}
+                            {t('products.search')}
                         </Button>
                     </form>
                 )}
@@ -292,14 +292,14 @@ export default function ProductsAdmin() {
                     <table className="w-full text-sm">
                         <thead className="text-left border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.products.image')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.products.name')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.products.categoryBrand')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.products.price')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.products.qty')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.common.status')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('admin.products.featured')}</th>
-                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('admin.common.actions')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('products.image')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('products.name')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('products.categoryBrand')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('products.price')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('products.qty')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('common.status')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400">{t('products.featured')}</th>
+                                <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-wide text-slate-400 text-right">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -310,8 +310,8 @@ export default function ProductsAdmin() {
                                     <td colSpan={8}>
                                         <EmptyState
                                             icon={Package}
-                                            title={tab === 'trashed' ? t('admin.products.trashEmpty') : t('admin.products.noProducts')}
-                                            subtitle={tab === 'trashed' ? t('admin.products.trashHint') : t('admin.products.createFirst')}
+                                            title={tab === 'trashed' ? t('products.trashEmpty') : t('products.noProducts')}
+                                            subtitle={tab === 'trashed' ? t('products.trashHint') : t('products.createFirst')}
                                         />
                                     </td>
                                 </tr>
@@ -343,7 +343,7 @@ export default function ProductsAdmin() {
                                         </td>
                                         <td className="px-6 py-3 text-slate-600">{p.quantity}</td>
                                         <td className="px-6 py-3">
-                                            <Badge tone={p.status ? 'emerald' : 'slate'}>{p.status ? t('admin.common.active') : t('admin.common.inactive')}</Badge>
+                                            <Badge tone={p.status ? 'emerald' : 'slate'}>{p.status ? t('common.active') : t('common.inactive')}</Badge>
                                         </td>
                                         <td className="px-6 py-3">
                                             {p.featured ? (
@@ -356,14 +356,14 @@ export default function ProductsAdmin() {
                                             <div className="flex items-center justify-end gap-1.5">
                                                 {tab === 'active' ? (
                                                     <>
-                                                        <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(p)} title={t('admin.common.edit')} />
-                                                        <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(p)} title={t('admin.common.delete')} />
+                                                        <IconButton icon={Pencil} tone="primary" onClick={() => openEdit(p)} title={t('common.edit')} />
+                                                        <IconButton icon={Trash2} tone="danger" onClick={() => handleDelete(p)} title={t('common.delete')} />
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <IconButton icon={ArrowRightLeft} tone="primary" onClick={() => openReassign(p)} title={t('admin.products.reassign')} />
-                                                        <IconButton icon={RotateCcw} tone="success" onClick={() => handleRestore(p)} title={t('admin.common.restore')} />
-                                                        <IconButton icon={XCircle} tone="danger" onClick={() => handleForceDelete(p)} title={t('admin.common.permanentlyDelete')} />
+                                                        <IconButton icon={ArrowRightLeft} tone="primary" onClick={() => openReassign(p)} title={t('products.reassign')} />
+                                                        <IconButton icon={RotateCcw} tone="success" onClick={() => handleRestore(p)} title={t('common.restore')} />
+                                                        <IconButton icon={XCircle} tone="danger" onClick={() => handleForceDelete(p)} title={t('common.permanentlyDelete')} />
                                                     </>
                                                 )}
                                             </div>
@@ -377,22 +377,22 @@ export default function ProductsAdmin() {
                 <Pagination meta={meta} page={page} onPageChange={setPage} />
             </Card>
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('admin.products.editProduct') : t('admin.products.newProduct')} wide>
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('products.editProduct') : t('products.newProduct')} wide>
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <FormError message={formError} />
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Input label={t('admin.products.nameAr')} required value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} dir="rtl" />
-                        <Input label={t('admin.products.nameEn')} required value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} />
+                        <Input label={t('products.nameAr')} required value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} dir="rtl" />
+                        <Input label={t('products.nameEn')} required value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} />
                         <Textarea
-                            label={t('admin.products.descriptionAr')}
+                            label={t('products.descriptionAr')}
                             value={form.description_ar}
                             onChange={(e) => setForm({ ...form, description_ar: e.target.value })}
                             rows={2}
                             dir="rtl"
                         />
                         <Textarea
-                            label={t('admin.products.descriptionEn')}
+                            label={t('products.descriptionEn')}
                             value={form.description_en}
                             onChange={(e) => setForm({ ...form, description_en: e.target.value })}
                             rows={2}
@@ -401,7 +401,7 @@ export default function ProductsAdmin() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <Input
-                            label={t('admin.products.priceLabel')}
+                            label={t('products.priceLabel')}
                             required
                             type="number"
                             step="0.01"
@@ -410,7 +410,7 @@ export default function ProductsAdmin() {
                             onChange={(e) => setForm({ ...form, price: e.target.value })}
                         />
                         <Input
-                            label={t('admin.products.discountPercent')}
+                            label={t('products.discountPercent')}
                             type="number"
                             min="0"
                             max="100"
@@ -419,7 +419,7 @@ export default function ProductsAdmin() {
                             placeholder="0"
                         />
                         <Input
-                            label={t('admin.products.quantity')}
+                            label={t('products.quantity')}
                             required
                             type="number"
                             min="0"
@@ -429,7 +429,7 @@ export default function ProductsAdmin() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('admin.products.availableSizes')}</label>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('products.availableSizes')}</label>
                         <div className="flex items-center gap-2 mb-2.5">
                             <input
                                 type="number"
@@ -441,11 +441,11 @@ export default function ProductsAdmin() {
                                         addSize();
                                     }
                                 }}
-                                placeholder={t('admin.products.sizePlaceholder')}
+                                placeholder={t('products.sizePlaceholder')}
                                 className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#81A6C6]/30 focus:border-[#81A6C6] transition-colors"
                             />
                             <Button type="button" variant="secondary" onClick={addSize} className="whitespace-nowrap">
-                                {t('admin.products.add')}
+                                {t('products.add')}
                             </Button>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -459,7 +459,7 @@ export default function ProductsAdmin() {
                                         type="button"
                                         onClick={() => removeSize(size)}
                                         className="text-white/60 hover:text-white leading-none w-4 h-4 flex items-center justify-center rounded-full hover:bg-white/10"
-                                        aria-label={`${t('admin.products.removeSize')} ${size}`}
+                                        aria-label={`${t('products.removeSize')} ${size}`}
                                     >
                                         &times;
                                     </button>
@@ -469,7 +469,7 @@ export default function ProductsAdmin() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('admin.products.availableColors')}</label>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('products.availableColors')}</label>
                         <div className="flex items-center gap-2 mb-2.5">
                             <input
                                 type="color"
@@ -487,11 +487,11 @@ export default function ProductsAdmin() {
                                         addColor();
                                     }
                                 }}
-                                placeholder={t('admin.products.colorPlaceholder')}
+                                placeholder={t('products.colorPlaceholder')}
                                 className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#81A6C6]/30 focus:border-[#81A6C6] transition-colors"
                             />
                             <Button type="button" variant="secondary" onClick={addColor} className="whitespace-nowrap">
-                                {t('admin.products.add')}
+                                {t('products.add')}
                             </Button>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -506,7 +506,7 @@ export default function ProductsAdmin() {
                                         type="button"
                                         onClick={() => removeColor(color.name)}
                                         className="text-white/60 hover:text-white leading-none w-4 h-4 flex items-center justify-center rounded-full hover:bg-white/10"
-                                        aria-label={`${t('admin.products.removeColor')} ${color.name}`}
+                                        aria-label={`${t('products.removeColor')} ${color.name}`}
                                     >
                                         &times;
                                     </button>
@@ -516,16 +516,16 @@ export default function ProductsAdmin() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Select label={t('admin.categories.title')} required value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}>
-                            <option value="">{t('admin.products.selectCategory')}</option>
+                        <Select label={t('categories.title')} required value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}>
+                            <option value="">{t('products.selectCategory')}</option>
                             {categories.map((c) => (
                                 <option key={c.id} value={c.id}>
                                     {c.name}
                                 </option>
                             ))}
                         </Select>
-                        <Select label={t('admin.brands.title')} required value={form.brand_id} onChange={(e) => setForm({ ...form, brand_id: e.target.value })}>
-                            <option value="">{t('admin.products.selectBrand')}</option>
+                        <Select label={t('brands.title')} required value={form.brand_id} onChange={(e) => setForm({ ...form, brand_id: e.target.value })}>
+                            <option value="">{t('products.selectBrand')}</option>
                             {brands.map((b) => (
                                 <option key={b.id} value={b.id}>
                                     {b.name}
@@ -536,7 +536,7 @@ export default function ProductsAdmin() {
 
                     <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                            {t('admin.products.mainImage')} {editing ? t('admin.common.keepCurrentImage') : ''}
+                            {t('products.mainImage')} {editing ? t('common.keepCurrentImage') : ''}
                         </label>
                         <input
                             type="file"
@@ -553,7 +553,7 @@ export default function ProductsAdmin() {
 
                     <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                            {t('admin.products.additionalImages')} {editing ? t('admin.products.additionalImagesReplace') : ''}
+                            {t('products.additionalImages')} {editing ? t('products.additionalImagesReplace') : ''}
                         </label>
                         <input
                             type="file"
@@ -565,29 +565,29 @@ export default function ProductsAdmin() {
                     </div>
 
                     <div className="flex items-center gap-6">
-                        <Toggle label={t('admin.products.activeToggle')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
-                        <Toggle label={t('admin.products.featuredToggle')} checked={form.featured} onChange={(v) => setForm({ ...form, featured: v })} />
+                        <Toggle label={t('products.activeToggle')} checked={form.status} onChange={(v) => setForm({ ...form, status: v })} />
+                        <Toggle label={t('products.featuredToggle')} checked={form.featured} onChange={(v) => setForm({ ...form, featured: v })} />
                     </div>
 
                     <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
                         <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
-                            {t('admin.common.cancel')}
+                            {t('common.cancel')}
                         </Button>
                         <Button type="submit" disabled={saving}>
-                            {saving ? t('admin.common.saving') : t('admin.products.saveProduct')}
+                            {saving ? t('common.saving') : t('products.saveProduct')}
                         </Button>
                     </div>
                 </form>
             </Modal>
 
-            <Modal open={!!reassignTarget} onClose={() => setReassignTarget(null)} title={`${t('admin.products.reassignTitle')} "${reassignTarget?.name}"`}>
+            <Modal open={!!reassignTarget} onClose={() => setReassignTarget(null)} title={`${t('products.reassignTitle')} "${reassignTarget?.name}"`}>
                 <form onSubmit={handleReassignSubmit} className="space-y-4">
                     <Select
-                        label={t('admin.categories.title')}
+                        label={t('categories.title')}
                         value={reassignForm.category_id}
                         onChange={(e) => setReassignForm({ ...reassignForm, category_id: e.target.value })}
                     >
-                        <option value="">{t('admin.products.keepCurrent')}</option>
+                        <option value="">{t('products.keepCurrent')}</option>
                         {categories.map((c) => (
                             <option key={c.id} value={c.id}>
                                 {c.name}
@@ -595,11 +595,11 @@ export default function ProductsAdmin() {
                         ))}
                     </Select>
                     <Select
-                        label={t('admin.brands.title')}
+                        label={t('brands.title')}
                         value={reassignForm.brand_id}
                         onChange={(e) => setReassignForm({ ...reassignForm, brand_id: e.target.value })}
                     >
-                        <option value="">{t('admin.products.keepCurrent')}</option>
+                        <option value="">{t('products.keepCurrent')}</option>
                         {brands.map((b) => (
                             <option key={b.id} value={b.id}>
                                 {b.name}
@@ -608,9 +608,9 @@ export default function ProductsAdmin() {
                     </Select>
                     <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
                         <Button type="button" variant="secondary" onClick={() => setReassignTarget(null)}>
-                            {t('admin.common.cancel')}
+                            {t('common.cancel')}
                         </Button>
-                        <Button type="submit">{t('admin.common.save')}</Button>
+                        <Button type="submit">{t('common.save')}</Button>
                     </div>
                 </form>
             </Modal>
